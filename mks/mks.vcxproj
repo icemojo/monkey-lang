@@ -137,7 +137,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="mks_lexer.cpp" />
     <ClCompile Include="mks_main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="mks_lexer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
