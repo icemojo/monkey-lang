@@ -12,60 +12,60 @@ std::unique_ptr<Lexer>
 LexerNew(const std::string &input)
 {
     auto lexer = std::make_unique<Lexer>(input);
-    LexerReadChar(*lexer);
+    lexer->read_char();
     return lexer;
 }
 
-void
-LexerReadChar(Lexer &lexer)
+void 
+Lexer::read_char()
 {
-    if (lexer.read_position >= lexer.input.size()) {
-        lexer.ch = '\0';
+    if (read_position >= input.size()) {
+        ch = '\0';
     }
     else {
-        lexer.ch = lexer.input[lexer.read_position];
+        ch = input[read_position];
     }
 
-    lexer.position = lexer.read_position;
-    lexer.read_position += 1;
+    position = read_position;
+    read_position += 1;
 }
 
 Token
-LexerNextToken(Lexer &lexer)
+Lexer::next_token()
 {
     Token token{};
 
-    switch (lexer.ch) {
+    switch (ch) {
     case '=':
-        token = TokenNew(TokenType::ASSIGN, lexer.ch);
+        token = TokenNew(TokenType::ASSIGN, ch);
         break;
     case ';':
-        token = TokenNew(TokenType::SEMICOLON, lexer.ch);
+        token = TokenNew(TokenType::SEMICOLON, ch);
         break;
     case '(':
-        token = TokenNew(TokenType::LPAREN, lexer.ch);
+        token = TokenNew(TokenType::LPAREN, ch);
         break;
     case ')':
-        token = TokenNew(TokenType::RPAREN, lexer.ch);
+        token = TokenNew(TokenType::RPAREN, ch);
         break;
     case '{':
-        token = TokenNew(TokenType::LBRACE, lexer.ch);
+        token = TokenNew(TokenType::LBRACE, ch);
         break;
     case '}':
-        token = TokenNew(TokenType::RBRACE, lexer.ch);
+        token = TokenNew(TokenType::RBRACE, ch);
         break;
     case ',':
-        token = TokenNew(TokenType::COMMA, lexer.ch);
+        token = TokenNew(TokenType::COMMA, ch);
         break;
     case '+':
-        token = TokenNew(TokenType::PLUS, lexer.ch);
+        token = TokenNew(TokenType::PLUS, ch);
         break;
 
     default:
         break;
     }
 
-    LexerReadChar(lexer);
+    read_char();
     return token;
 }
 

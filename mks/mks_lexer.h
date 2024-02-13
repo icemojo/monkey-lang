@@ -53,18 +53,16 @@ TokenNew(TokenType type, byte ch);
 
 struct Lexer {
     std::string input{};
-    i32 position = 0;
-    i32 read_position = 0;
+    i32 position = 0;       // current position in the input
+    i32 read_position = 0;  // current reading position, 1 char ahead of the current one
     byte ch = '\0';
+
+    void read_char();
+
+    Token next_token();
 };
 
 std::unique_ptr<Lexer>
 LexerNew(const std::string &input);
-
-void
-LexerReadChar(Lexer &lexer);
-
-Token
-LexerNextToken(const Lexer &lexer);
 
 #endif // MKS_LEXER_H_
