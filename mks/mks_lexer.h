@@ -20,7 +20,7 @@ enum class TokenType {
     ILLEGAL,
     T_EOF,
 
-    // Identifiers + literals
+    // User-defined identifiers + literals
     IDENT,      // add, foobar, x, y,...
     INT,        // 1234, -42
 
@@ -50,6 +50,8 @@ struct Token {
 Token
 TokenNew(TokenType type, byte ch);
 
+TokenType
+CheckKeywordOrIdentifier(const std::string identifier);
 
 struct Lexer {
     std::string input{};
@@ -60,9 +62,21 @@ struct Lexer {
     void read_char();
 
     Token next_token();
+
+    std::string read_identifier();
+
+    std::string read_number();
+
+    void skip_whitespace();
 };
 
 std::unique_ptr<Lexer>
 LexerNew(const std::string &input);
+
+void
+PrintLexation(const Lexer &lexer);
+
+bool
+ValidIdentifierLetter(const byte c);
 
 #endif // MKS_LEXER_H_
