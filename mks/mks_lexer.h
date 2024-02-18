@@ -57,6 +57,14 @@ enum class TokenType {
     FALSE,      // false
 };
 
+constexpr std::string
+TokenTypeToString(TokenType type);
+
+std::ostream &
+operator<<(std::ostream &out, const TokenType token_type);
+
+//------------------------------------------------------------------------------
+
 static const std::unordered_map<std::string_view, TokenType> 
 KEYWORDS = {
     {"let", TokenType::LET},
@@ -71,6 +79,8 @@ KEYWORDS = {
 struct Token {
     TokenType type = TokenType::ILLEGAL;
     std::string literal{};
+
+    void print() const;
 };
 
 Token
@@ -92,7 +102,7 @@ struct Lexer {
 
     void read_char();
 
-    byte peek_char();
+    byte peek_char() const;
 
     Token next_token();
 
@@ -101,13 +111,14 @@ struct Lexer {
     std::string read_number();
 
     void skip_whitespace();
+
+    void print() const;
+
+    void print_tokens();
 };
 
 std::unique_ptr<Lexer>
 LexerNew(const std::string &input);
-
-void
-PrintLexation(const Lexer &lexer);
 
 //------------------------------------------------------------------------------
 

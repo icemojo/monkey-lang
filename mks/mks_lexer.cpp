@@ -3,6 +3,92 @@
 #include "mks_lexer.h"
 
 
+constexpr std::string
+TokenTypeToString(TokenType type)
+{
+    switch (type) {
+    case TokenType::ILLEGAL:
+        return "ILLEGAL";
+    case TokenType::T_EOF:
+        return "T_EOF";
+
+    case TokenType::IDENT:
+        return "IDENT";
+    case TokenType::INT:
+        return "INT";
+
+    case TokenType::ASSIGN:
+        return "ASSIGN";
+    case TokenType::BANG:
+        return "BANG";
+    case TokenType::PLUS:
+        return "PLUS";
+    case TokenType::MINUS:
+        return "MINUS";
+    case TokenType::ASTRISK:
+        return "ASTRISK";
+    case TokenType::SLASH:
+        return "SLASH";
+    case TokenType::LT:
+        return "LT";
+    case TokenType::GT:
+        return "GT";
+    case TokenType::LT_EQ:
+        return "LT_EQ";
+    case TokenType::GT_EQ:
+        return "GT_EQ";
+    case TokenType::EQ:
+        return "EQ";
+    case TokenType::NOT_EQ:
+        return "NOT_EQ";
+
+    case TokenType::COMMA:
+        return "COMMA";
+    case TokenType::SEMICOLON:
+        return "SEMICOLON";
+    case TokenType::LPAREN:
+        return "LPAREN";
+    case TokenType::RPAREN:
+        return "RPAREN";
+    case TokenType::LBRACE:
+        return "LBRACE";
+    case TokenType::RBRACE:
+        return "RBRACE";
+
+    case TokenType::LET:
+        return "LET";
+    case TokenType::FUNCTION:
+        return "FUNCTION";
+    case TokenType::RETURN:
+        return "RETURN";
+    case TokenType::IF:
+        return "IF";
+    case TokenType::ELSE:
+        return "ELSE";
+    case TokenType::TRUE:
+        return "TRUE";
+    case TokenType::FALSE:
+        return "FALSE";
+        
+    default:
+        return "TokenType::ILLEGAL";
+    }
+}
+
+std::ostream &
+operator<<(std::ostream &out, const TokenType token_type)
+{
+    return out << TokenTypeToString(token_type);
+}
+
+//------------------------------------------------------------------------------
+
+void 
+Token::print() const
+{
+    std::cout << type << " " << literal << '\n';
+}
+
 Token
 TokenNew(TokenType type, byte ch) 
 {
@@ -46,7 +132,7 @@ Lexer::read_char()
 }
 
 byte 
-Lexer::peek_char()
+Lexer::peek_char() const
 {
     if (read_position >= input.size()) {
         return '\0';
@@ -203,23 +289,29 @@ Lexer::skip_whitespace()
     }
 }
 
+void
+Lexer::print() const
+{
+    std::cout << "Lexer (input):\n";
+    std::cout << input << std::endl;
+}
+
+void 
+Lexer::print_tokens()
+{
+    std::cout << "Lexer tokens:{\n";
+    for (Token token = next_token(); token.type != TokenType::T_EOF; token = next_token()) {
+        token.print();
+    }
+    std::cout << '}' << std::endl;
+}
+
 std::unique_ptr<Lexer>
 LexerNew(const std::string &input)
 {
     auto lexer = std::make_unique<Lexer>(input);
     lexer->read_char();
     return lexer;
-}
-
-void
-PrintLexation(const Lexer &lexer)
-{
-    std::cout << "Lexer (input):\n";
-    std::cout << lexer.input;
-    std::cout << '\n';
-
-    std::cout << "Lexer:\n";
-    std::cout << '\n';
 }
 
 //------------------------------------------------------------------------------
