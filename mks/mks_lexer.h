@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <unordered_map>
 
 using byte   = char;
 using ubyte  = unsigned char;
@@ -26,12 +27,21 @@ enum class TokenType {
 
     // Operators
     ASSIGN,     // =
+    BANG,       // !
     PLUS,       // +
+    MINUS,      // -
+    ASTRISK,    // *
+    SLASH,      // /
+    LT,         // <
+    GT,         // >
+    LT_EQ,      // <=
+    GT_EQ,      // >=
+    EQ,         // ==
+    NOT_EQ,     // !=
 
     // Delimiters
     COMMA,      // ,
     SEMICOLON,  // ;
-
     LPAREN,     // (
     RPAREN,     // )
     LBRACE,     // {
@@ -40,6 +50,22 @@ enum class TokenType {
     // Keywords
     LET,        // let
     FUNCTION,   // fn
+    RETURN,     // return
+    IF,         // if
+    ELSE,       // else
+    TRUE,       // true
+    FALSE,      // false
+};
+
+static const std::unordered_map<std::string_view, TokenType> 
+KEYWORDS = {
+    {"let", TokenType::LET},
+    {"fn", TokenType::FUNCTION},
+    {"return", TokenType::RETURN},
+    {"if", TokenType::IF},
+    {"else", TokenType::ELSE},
+    {"true", TokenType::TRUE},
+    {"false", TokenType::FALSE},
 };
 
 struct Token {
@@ -50,9 +76,13 @@ struct Token {
 Token
 TokenNew(TokenType type, byte ch);
 
-TokenType
-CheckKeywordOrIdentifier(const std::string identifier);
+Token
+TokenNew(TokenType type, const std::string &literal);
 
+TokenType
+CheckKeywordOrIdentifier(const std::string_view &identifier);
+
+//------------------------------------------------------------------------------
 
 struct Lexer {
     std::string input{};
@@ -61,6 +91,8 @@ struct Lexer {
     byte ch = '\0';
 
     void read_char();
+
+    byte peek_char();
 
     Token next_token();
 
@@ -76,6 +108,8 @@ LexerNew(const std::string &input);
 
 void
 PrintLexation(const Lexer &lexer);
+
+//------------------------------------------------------------------------------
 
 bool
 ValidIdentifierLetter(const byte c);

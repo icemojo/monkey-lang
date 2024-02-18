@@ -15,10 +15,27 @@ int main(int argc, char **argv)
         let multiplier = 2;
 
         let add = fn(a, b) {
-            a + b;
+            if (a == b) {
+                a * 2;
+            }
+            else {
+                a + b;
+            }
         }
 
         let result = add(x, y) * multiplier;
+        let result2 = result / 2;
+        !-+/<12> * 1024;
+
+        if (x > y) {
+            return true;
+        }
+        else {
+            return false;
+        }
+        x != y;
+
+        12 < 25 > 7;
     )";
     std::unique_ptr<Lexer> l2 = LexerNew(input2);
     PrintLexation(*l2);

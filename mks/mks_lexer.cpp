@@ -1,6 +1,5 @@
 #include <iostream>
 #include <format>
-//#include <cctype>
 #include "mks_lexer.h"
 
 
@@ -10,18 +9,27 @@ TokenNew(TokenType type, byte ch)
     return Token{ type, { ch } };
 }
 
-TokenType
-CheckKeywordOrIdentifier(const std::string identifier)
+Token
+TokenNew(TokenType type, const std::string &literal) 
 {
-    if (identifier == "fn") {
-        return TokenType::FUNCTION;
+    return Token{ type, literal };
+}
+
+TokenType
+CheckKeywordOrIdentifier(const std::string_view &identifier)
+{
+    if (KEYWORDS.size() == 0) {
+        return TokenType::IDENT;
     }
-    if (identifier == "let") {
-        return TokenType::LET;
+
+    if (const auto search_it = KEYWORDS.find(identifier); search_it != KEYWORDS.end()) {
+        return search_it->second;
     }
+
     return TokenType::IDENT;
 }
 
+//------------------------------------------------------------------------------
 
 void 
 Lexer::read_char()
@@ -37,6 +45,17 @@ Lexer::read_char()
     read_position += 1;
 }
 
+byte 
+Lexer::peek_char()
+{
+    if (read_position >= input.size()) {
+        return '\0';
+    }
+    else {
+        return input[read_position];
+    }
+}
+
 Token
 Lexer::next_token()
 {
@@ -45,7 +64,56 @@ Lexer::next_token()
 
     switch (ch) {
     case '=':
-        token = TokenNew(TokenType::ASSIGN, ch);
+        if (const byte nch = peek_char(); nch == '=') {
+            read_char();
+            token = TokenNew(TokenType::EQ, { ch, nch });
+        }
+        else {
+            token = TokenNew(TokenType::ASSIGN, ch);
+        }
+        break;
+    case '!':
+        if (const byte nch = peek_char(); nch == '=') {
+            read_char();
+            token = TokenNew(TokenType::NOT_EQ, { ch, nch });
+        }
+        else {
+            token = TokenNew(TokenType::BANG, ch);
+        }
+        break;
+    case '+':
+        token = TokenNew(TokenType::PLUS, ch);
+        break;
+    case '-':
+        token = TokenNew(TokenType::MINUS, ch);
+        break;
+    case '*':
+        token = TokenNew(TokenType::ASTRISK, ch);
+        break;
+    case '/':
+        token = TokenNew(TokenType::SLASH, ch);
+        break;
+    case '<':
+        if (const byte nch = peek_char(); nch == '=') {
+            read_char();
+            token = TokenNew(TokenType::LT_EQ, { ch, nch });
+        }
+        else {
+            token = TokenNew(TokenType::LT, ch);
+        }
+        break;
+    case '>':
+        if (const byte nch = peek_char(); nch == '=') {
+            read_char();
+            token = TokenNew(TokenType::GT_EQ, { ch, nch });
+        }
+        else {
+            token = TokenNew(TokenType::GT, ch);
+        }
+        break;
+
+    case ',':
+        token = TokenNew(TokenType::COMMA, ch);
         break;
     case ';':
         token = TokenNew(TokenType::SEMICOLON, ch);
@@ -61,12 +129,6 @@ Lexer::next_token()
         break;
     case '}':
         token = TokenNew(TokenType::RBRACE, ch);
-        break;
-    case ',':
-        token = TokenNew(TokenType::COMMA, ch);
-        break;
-    case '+':
-        token = TokenNew(TokenType::PLUS, ch);
         break;
 
     case '\0':
@@ -86,9 +148,9 @@ Lexer::next_token()
             token.type = TokenType::INT;
             return token;
         }
-        else {
-            token = TokenNew(TokenType::ILLEGAL, ch);
-        }
+
+        token = TokenNew(TokenType::ILLEGAL, ch);
+        break;
     }
 
     read_char();
@@ -159,6 +221,8 @@ PrintLexation(const Lexer &lexer)
     std::cout << "Lexer:\n";
     std::cout << '\n';
 }
+
+//------------------------------------------------------------------------------
 
 bool 
 ValidIdentifierLetter(const byte c)
