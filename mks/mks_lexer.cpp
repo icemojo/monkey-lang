@@ -23,25 +23,6 @@ CheckKeywordOrIdentifier(const std::string identifier)
 }
 
 
-std::unique_ptr<Lexer>
-LexerNew(const std::string &input)
-{
-    auto lexer = std::make_unique<Lexer>(input);
-    lexer->read_char();
-    return lexer;
-}
-
-void
-PrintLexation(const Lexer &lexer)
-{
-    std::cout << "Lexer (input):\n";
-    std::cout << lexer.input;
-    std::cout << '\n';
-
-    std::cout << "Lexer:\n";
-    std::cout << '\n';
-}
-
 void 
 Lexer::read_char()
 {
@@ -158,6 +139,25 @@ Lexer::skip_whitespace()
     if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r') {
         read_char();
     }
+}
+
+std::unique_ptr<Lexer>
+LexerNew(const std::string &input)
+{
+    auto lexer = std::make_unique<Lexer>(input);
+    lexer->read_char();
+    return lexer;
+}
+
+void
+PrintLexation(const Lexer &lexer)
+{
+    std::cout << "Lexer (input):\n";
+    std::cout << lexer.input;
+    std::cout << '\n';
+
+    std::cout << "Lexer:\n";
+    std::cout << '\n';
 }
 
 bool 

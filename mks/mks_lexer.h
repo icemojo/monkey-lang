@@ -53,6 +53,7 @@ TokenNew(TokenType type, byte ch);
 TokenType
 CheckKeywordOrIdentifier(const std::string identifier);
 
+
 struct Lexer {
     std::string input{};
     i32 position = 0;       // current position in the input
