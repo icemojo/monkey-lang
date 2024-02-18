@@ -110,7 +110,7 @@ struct Lexer {
 
     std::string read_number();
 
-    void skip_whitespace();
+    void skip_whitespaces();
 
     void print() const;
 

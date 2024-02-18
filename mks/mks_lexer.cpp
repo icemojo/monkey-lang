@@ -86,7 +86,7 @@ operator<<(std::ostream &out, const TokenType token_type)
 void 
 Token::print() const
 {
-    std::cout << type << " " << literal << '\n';
+    std::cout << "  " << type << " " << literal << '\n';
 }
 
 Token
@@ -146,13 +146,13 @@ Token
 Lexer::next_token()
 {
     Token token{};
-    skip_whitespace();
+    skip_whitespaces();
 
     switch (ch) {
     case '=':
         if (const byte nch = peek_char(); nch == '=') {
-            read_char();
             token = TokenNew(TokenType::EQ, { ch, nch });
+            read_char();
         }
         else {
             token = TokenNew(TokenType::ASSIGN, ch);
@@ -160,8 +160,8 @@ Lexer::next_token()
         break;
     case '!':
         if (const byte nch = peek_char(); nch == '=') {
-            read_char();
             token = TokenNew(TokenType::NOT_EQ, { ch, nch });
+            read_char();
         }
         else {
             token = TokenNew(TokenType::BANG, ch);
@@ -181,8 +181,8 @@ Lexer::next_token()
         break;
     case '<':
         if (const byte nch = peek_char(); nch == '=') {
-            read_char();
             token = TokenNew(TokenType::LT_EQ, { ch, nch });
+            read_char();
         }
         else {
             token = TokenNew(TokenType::LT, ch);
@@ -190,8 +190,8 @@ Lexer::next_token()
         break;
     case '>':
         if (const byte nch = peek_char(); nch == '=') {
-            read_char();
             token = TokenNew(TokenType::GT_EQ, { ch, nch });
+            read_char();
         }
         else {
             token = TokenNew(TokenType::GT, ch);
@@ -267,24 +267,29 @@ Lexer::read_number()
 {
     std::string identifier{};
 
-    const auto start_it = input.begin() + position;
     for (auto it = input.begin() + position; it != input.end(); it += 1) {
         if (std::isdigit(*it) != 0) {
+            identifier.push_back(*it);
             read_char();
             continue;
         }
         else {
-            return identifier = { start_it, it };
+            break;
         }
     }
 
-    return "0";
+    if (!identifier.empty()) {
+        return identifier;
+    }
+    else {
+        return "0";
+    }
 }
 
 void 
-Lexer::skip_whitespace()
+Lexer::skip_whitespaces()
 {
-    if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r') {
+    while (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r') {
         read_char();
     }
 }
@@ -299,7 +304,7 @@ Lexer::print() const
 void 
 Lexer::print_tokens()
 {
-    std::cout << "Lexer tokens:{\n";
+    std::cout << "Lexer tokens: {\n";
     for (Token token = next_token(); token.type != TokenType::T_EOF; token = next_token()) {
         token.print();
     }
