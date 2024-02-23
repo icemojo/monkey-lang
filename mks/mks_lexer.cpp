@@ -311,12 +311,10 @@ Lexer::print_tokens()
     std::cout << '}' << std::endl;
 }
 
-//std::unique_ptr<Lexer>
-Lexer *
+std::unique_ptr<Lexer>
 LexerNew(const std::string &input)
 {
-    //auto lexer = std::make_unique<Lexer>(input);
-    Lexer *lexer = new Lexer{ input };
+    auto lexer = std::make_unique<Lexer>(input);
     lexer->read_char();
     return lexer;
 }

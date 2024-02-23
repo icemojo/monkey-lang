@@ -2,10 +2,10 @@
 
 
 Parser *
-ParserNew(Lexer *lexer)
+ParserNew(std::unique_ptr<Lexer> lexer)
 {
     Parser *parser = new Parser{
-        .lexer = lexer
+        .lexer = std::move(lexer),
     };
 
     // Read two tokens, so that current token and peek tokens are set

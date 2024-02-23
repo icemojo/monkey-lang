@@ -53,8 +53,7 @@ ReplStart(const Options &options)
             continue;
         }
 
-        //std::unique_ptr<Lexer> 
-        Lexer *lexer = LexerNew(input_buffer);
+        std::unique_ptr<Lexer> lexer = LexerNew(input_buffer);
         input_buffer.clear();
 
         if (options.verbose) {
