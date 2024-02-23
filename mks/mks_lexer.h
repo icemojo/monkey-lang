@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include <memory>
+//#include <memory>
 #include <unordered_map>
 
 using byte   = char;
@@ -117,7 +117,8 @@ struct Lexer {
     void print_tokens();
 };
 
-std::unique_ptr<Lexer>
+//std::unique_ptr<Lexer>
+Lexer *
 LexerNew(const std::string &input);
 
 //------------------------------------------------------------------------------

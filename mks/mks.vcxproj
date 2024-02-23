@@ -141,10 +141,14 @@
   <ItemGroup>
     <ClCompile Include="mks_lexer.cpp" />
     <ClCompile Include="mks_main.cpp" />
+    <ClCompile Include="mks_ast.cpp" />
+    <ClCompile Include="mks_parser.cpp" />
     <ClCompile Include="mks_repl.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mks_lexer.h" />
+    <ClInclude Include="mks_ast.h" />
+    <ClInclude Include="mks_parser.h" />
     <ClInclude Include="mks_repl.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
