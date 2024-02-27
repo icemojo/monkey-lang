@@ -2,7 +2,7 @@
 
 
 Parser *
-ParserNew(std::unique_ptr<Lexer> lexer)
+ParserNew(unique_ptr<Lexer> lexer)
 {
     Parser *parser = new Parser{
         .lexer = std::move(lexer),

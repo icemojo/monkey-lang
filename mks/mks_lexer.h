@@ -3,8 +3,14 @@
 
 #include <string>
 #include <vector>
-#include <memory>
 #include <unordered_map>
+#include <memory>
+
+using std::string;
+using std::string_view;
+using std::vector;
+using std::unordered_map;
+using std::unique_ptr, std::make_unique;
 
 using byte   = char;
 using ubyte  = unsigned char;
@@ -57,7 +63,7 @@ enum class TokenType {
     FALSE,      // false
 };
 
-constexpr std::string
+constexpr string
 TokenTypeToString(TokenType type);
 
 std::ostream &
@@ -65,7 +71,7 @@ operator<<(std::ostream &out, const TokenType token_type);
 
 //------------------------------------------------------------------------------
 
-static const std::unordered_map<std::string_view, TokenType> 
+static const unordered_map<string_view, TokenType> 
 KEYWORDS = {
     {"let", TokenType::LET},
     {"fn", TokenType::FUNCTION},
@@ -78,7 +84,7 @@ KEYWORDS = {
 
 struct Token {
     TokenType type = TokenType::ILLEGAL;
-    std::string literal{};
+    string literal{};
 
     void print() const;
 };
@@ -87,15 +93,15 @@ Token
 TokenNew(TokenType type, byte ch);
 
 Token
-TokenNew(TokenType type, const std::string &literal);
+TokenNew(TokenType type, const string &literal);
 
 TokenType
-CheckKeywordOrIdentifier(const std::string_view &identifier);
+CheckKeywordOrIdentifier(const string_view &identifier);
 
 //------------------------------------------------------------------------------
 
 struct Lexer {
-    std::string input{};
+    string input{};
     i32 position = 0;       // current position in the input
     i32 read_position = 0;  // current reading position, 1 char ahead of the current one
     byte ch = '\0';
@@ -106,9 +112,9 @@ struct Lexer {
 
     Token next_token();
 
-    std::string read_identifier();
+    string read_identifier();
 
-    std::string read_number();
+    string read_number();
 
     void skip_whitespaces();
 
@@ -117,8 +123,8 @@ struct Lexer {
     void print_tokens();
 };
 
-std::unique_ptr<Lexer>
-LexerNew(const std::string &input);
+unique_ptr<Lexer>
+LexerNew(const string &input);
 
 //------------------------------------------------------------------------------
 

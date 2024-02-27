@@ -3,7 +3,7 @@
 #include "mks_lexer.h"
 
 
-constexpr std::string
+constexpr string
 TokenTypeToString(TokenType type)
 {
     switch (type) {
@@ -96,13 +96,13 @@ TokenNew(TokenType type, byte ch)
 }
 
 Token
-TokenNew(TokenType type, const std::string &literal) 
+TokenNew(TokenType type, const string &literal) 
 {
     return Token{ type, literal };
 }
 
 TokenType
-CheckKeywordOrIdentifier(const std::string_view &identifier)
+CheckKeywordOrIdentifier(const string_view &identifier)
 {
     if (KEYWORDS.size() == 0) {
         return TokenType::IDENT;
@@ -243,10 +243,10 @@ Lexer::next_token()
     return token;
 }
 
-std::string
+string
 Lexer::read_identifier()
 {
-    std::string identifier{};
+    string identifier{};
 
     const auto start_it = input.begin() + position;
     for (auto it = input.begin() + position; it != input.end(); it += 1) {
@@ -262,10 +262,10 @@ Lexer::read_identifier()
     return "";
 }
 
-std::string
+string
 Lexer::read_number()
 {
-    std::string identifier{};
+    string identifier{};
 
     for (auto it = input.begin() + position; it != input.end(); it += 1) {
         if (std::isdigit(*it) != 0) {
@@ -311,10 +311,10 @@ Lexer::print_tokens()
     std::cout << '}' << std::endl;
 }
 
-std::unique_ptr<Lexer>
-LexerNew(const std::string &input)
+unique_ptr<Lexer>
+LexerNew(const string &input)
 {
-    auto lexer = std::make_unique<Lexer>(input);
+    auto lexer = make_unique<Lexer>(input);
     lexer->read_char();
     return lexer;
 }

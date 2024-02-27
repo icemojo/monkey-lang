@@ -3,8 +3,11 @@
 
 #include <string>
 
+using std::string;
+using std::string_view;
 
-static const std::string_view PROMPT = ">> ";
+
+static const string_view PROMPT = ">> ";
 
 struct Options {
     bool tokenize_only = false;

@@ -1,7 +1,7 @@
 #include "mks_ast.h"
 
 
-std::string 
+string 
 Statement::token_literal() const
 {
     return "Statement ";
@@ -9,13 +9,13 @@ Statement::token_literal() const
 
 //------------------------------------------------------------------------------
 
-std::string 
+string 
 Identifier::token_literal() const
 {
     return token.literal;
 }
 
-std::string 
+string 
 LetStatement::token_literal() const
 {
     return token.literal;
@@ -23,7 +23,7 @@ LetStatement::token_literal() const
 
 //------------------------------------------------------------------------------
 
-std::string
+string
 Program::token_literal() const
 {
     if (statements.empty()) {

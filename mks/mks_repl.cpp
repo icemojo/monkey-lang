@@ -14,7 +14,7 @@ ParseOptions(int argc, char **argv)
         return options;
     }
 
-    auto to_string = [](const char *v) { return std::string(v); };
+    auto to_string = [](const char *v) { return string(v); };
     auto args = std::span(argv, argc) | std::views::transform(to_string);
 
     for (auto it = args.begin() + 1; it != args.end(); it += 1) {
@@ -57,7 +57,7 @@ ReplStart(const Options &options)
             continue;
         }
 
-        std::unique_ptr<Lexer> lexer = LexerNew(input_buffer);
+        unique_ptr<Lexer> lexer = LexerNew(input_buffer);
         input_buffer.clear();
 
         if (options.verbose) {

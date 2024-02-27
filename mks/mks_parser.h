@@ -5,14 +5,16 @@
 #include "mks_lexer.h"
 #include "mks_ast.h"
 
+using std::unique_ptr;
+
 
 struct Parser;
 
 Parser *
-ParserNew(std::unique_ptr<Lexer> lexer);
+ParserNew(unique_ptr<Lexer> lexer);
 
 struct Parser {
-    std::unique_ptr<Lexer> lexer;
+    unique_ptr<Lexer> lexer;
     Token cur_token = {};
     Token peek_token = {};
 

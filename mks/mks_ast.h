@@ -5,32 +5,35 @@
 #include <vector>
 #include "mks_lexer.h"
 
+using std::string;
+using std::vector;
+
 
 struct Node {
     // NOTE(yemon): 'token_literal' and all similar methods in the sub-types
     // are pretty much for debugging purpose.
-    std::string token_literal() const;
+    string token_literal() const;
 };
 
 struct Statement {
 
-    std::string token_literal() const;
+    string token_literal() const;
 
-    std::string statement_node() const;
+    string statement_node() const;
 };
 
 struct Expression {
 
-    std::string token_literal() const;
+    string token_literal() const;
 
-    std::string expression_node() const;
+    string expression_node() const;
 };
 
 //------------------------------------------------------------------------------
 
 struct Identifier {
     Token token;
-    std::string value;
+    string value;
 
     Identifier() {
         token = {
@@ -40,7 +43,7 @@ struct Identifier {
         value = token.literal;
     }
 
-    std::string token_literal() const;
+    string token_literal() const;
 };
 
 //  let <identifier> = <expression>;
@@ -55,15 +58,15 @@ struct LetStatement {
         value = {};
     }
 
-    std::string token_literal() const;
+    string token_literal() const;
 };
 
 //------------------------------------------------------------------------------
 
 struct Program {
-    std::vector<Statement> statements;
+    vector<Statement> statements;
 
-    std::string token_literal() const;
+    string token_literal() const;
 };
 
 #endif  // MKS_ATS_
