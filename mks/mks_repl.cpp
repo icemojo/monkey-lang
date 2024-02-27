@@ -4,6 +4,7 @@
 #include "mks_repl.h"
 #include "mks_lexer.h"
 #include "mks_ast.h"
+#include "mks_parser.h"
 
 
 Options 
@@ -59,9 +60,10 @@ ReplStart(const Options &options)
 
         unique_ptr<Lexer> lexer = LexerNew(input_buffer);
         input_buffer.clear();
+        Parser *parser = ParserNew(lexer);
 
         if (options.verbose) {
-            lexer->print_tokens();
+            parser->lexer->print_tokens();
         }
     }
 }

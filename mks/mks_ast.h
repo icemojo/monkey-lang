@@ -15,6 +15,8 @@ struct Node {
     string token_literal() const;
 };
 
+//------------------------------------------------------------------------------
+
 struct Statement {
 
     string token_literal() const;
@@ -22,7 +24,23 @@ struct Statement {
     string statement_node() const;
 };
 
+struct Identifier {
+    Token token;
+    string value;
+
+    //Identifier() {
+    //    token = {
+    //        .type = TokenType::IDENT,
+    //        .literal = "",
+    //    };
+    //    value = token.literal;
+    //}
+
+    string token_literal() const;
+};
+
 struct Expression {
+    Token token;
 
     string token_literal() const;
 
@@ -31,40 +49,17 @@ struct Expression {
 
 //------------------------------------------------------------------------------
 
-struct Identifier {
-    Token token;
-    string value;
-
-    Identifier() {
-        token = {
-            .type = TokenType::IDENT,
-            .literal = "",
-        };
-        value = token.literal;
-    }
-
-    string token_literal() const;
-};
-
 //  let <identifier> = <expression>;
 struct LetStatement {
     Token token;
     Identifier *name;
-    Expression value;
+    Expression *value;
 
     LetStatement() {
         token = TokenNew(TokenType::LET, "let");    //?
         name = nullptr;
         value = {};
     }
-
-    string token_literal() const;
-};
-
-//------------------------------------------------------------------------------
-
-struct Program {
-    vector<Statement> statements;
 
     string token_literal() const;
 };
