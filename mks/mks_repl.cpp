@@ -35,8 +35,12 @@ ParseOptions(int argc, char **argv)
 void 
 ReplStart(const Options &options)
 {
-    std::cout << "Well, hello there! They say enough monkeys with typewriters can finish a novel." << std::endl;
-    std::cout << "So, why don't you start your shenanigans?" << std::endl;
+    std::cout << "Well, hello there! They say enough monkeys with typewriters can finish a novel.\n";
+    std::cout << "So, why don't you start your shenanigans?\n";
+
+    if (options.verbose) {
+        std::cout << "(Verbose mode turned on.)\n";
+    }
 
     bool should_quit = false;
     std::string input_buffer{};
