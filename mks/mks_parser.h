@@ -47,9 +47,9 @@ struct Parser {
 
     Program *parse_program();
 
-    Statement *parse_statement();
+    StatementResult<Statement> parse_statement();
 
-    LetStatement *parse_let_statement();
+    StatementResult<LetStatement> parse_let_statement();
 
     bool is_cur_token(const TokenType type) const;
 

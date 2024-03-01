@@ -2,12 +2,6 @@
 
 
 string 
-Statement::token_literal() const
-{
-    return "Statement ";
-}
-
-string 
 Identifier::token_literal() const
 {
     return token.literal;
@@ -16,8 +10,14 @@ Identifier::token_literal() const
 //------------------------------------------------------------------------------
 
 string 
+Statement::token_literal() const
+{
+    return string{ "Statment: " };
+}
+
+string 
 LetStatement::token_literal() const
 {
-    return token.literal;
+    return string{ "LetStatement: " };
 }
 

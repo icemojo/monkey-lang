@@ -9,7 +9,8 @@ Program::token_literal() const
         return "";
     }
     else {
-        return statements.at(0).token_literal();
+        //return statements.at(0).token_literal();
+        return "";
     }
 }
 
@@ -69,10 +70,10 @@ Parser::parse_program()
 
     ParserIter it = ParserIter{ this };
     while (it.valid()) {
-        LetStatement *let_statement = it->parse_let_statement();
-
-        if (let_statement != nullptr) {
-            //TODO(yemon): program->statements.push_back(*let_statement);
+        if (StatementResult<Statement> result = it->parse_statement(); 
+            result.success) {
+            program->statements.push_back(*result.statement_ptr);
+            delete result.statement_ptr;
         }
 
         it.next();
@@ -81,45 +82,64 @@ Parser::parse_program()
     return program;
 }
 
-Statement *
+StatementResult<Statement>
 Parser::parse_statement()
 {
+    StatementResult<Statement> result = {
+        .success = false,
+        .statement_ptr = nullptr,
+    };
+
     switch (cur_token.type) {
     case TokenType::LET:
-        return new Statement{};
+        if (StatementResult<LetStatement> let_result = parse_let_statement();
+            let_result.success) {
+            result.success = true;
+            result.statement_ptr = let_result.statement_ptr;
+            return result;
+        }
         break;
 
     default:
-        return nullptr;
+        return result;
     }
+
+    return result;
 }
 
-LetStatement *
+StatementResult<LetStatement>
 Parser::parse_let_statement()
 {
-    LetStatement *statement = new LetStatement{ };
-
-    if (!expect_peek(TokenType::IDENT)) {
-        return nullptr;
-    }
-
-    statement->name = new Identifier{
-        .token = cur_token,
-        .value = cur_token.literal
+    StatementResult<LetStatement> result{
+        .success = false,
+        .statement_ptr = nullptr,
     };
 
-    if (!expect_peek(TokenType::ASSIGN)) {
-        return nullptr;
+    if (!expect_peek(TokenType::IDENT)) {
+        result.success = false;
+        return result;
     }
+
+    if (!expect_peek(TokenType::ASSIGN)) {
+        result.success = false;
+        return result;
+    }
+
+    result.statement_ptr = new LetStatement();
+    result.statement_ptr->name = Identifier{
+        .token = cur_token,
+        .value = cur_token.literal,
+    };
 
     // TODO(yemon): Skipping the expression part for now, 
     // since this requires recursive-descent-parsing
-    statement->value = nullptr;
+    result.statement_ptr->value = Expression{};
     while (!is_cur_token(TokenType::SEMICOLON)) {
         next_token();
     }
 
-    return statement;
+    result.success = true;
+    return result;
 }
 
 bool

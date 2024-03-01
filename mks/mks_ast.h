@@ -17,13 +17,6 @@ struct Node {
 
 //------------------------------------------------------------------------------
 
-struct Statement {
-
-    string token_literal() const;
-
-    string statement_node() const;
-};
-
 struct Identifier {
     Token token;
     string value;
@@ -49,19 +42,66 @@ struct Expression {
 
 //------------------------------------------------------------------------------
 
+template <typename T>
+struct StatementResult {
+    bool success{ false };
+    T *statement_ptr{};
+};
+
+struct Statement {
+    virtual string token_literal() const;
+};
+
 //  let <identifier> = <expression>;
-struct LetStatement {
+struct LetStatement : Statement {
     Token token;
-    Identifier *name;
-    Expression *value;
+    Identifier name;
+    Expression value;
 
     LetStatement() {
         token = TokenNew(TokenType::LET, "let");    //?
-        name = nullptr;
+        name = {},
         value = {};
     }
 
-    string token_literal() const;
+    string token_literal() const override;
+
+    //~LetStatement() {
+    //    token = {};
+    //    if (name != nullptr) {
+    //        delete name;
+    //    }
+    //    if (value != nullptr) {
+    //        delete value;
+    //    }
+    //}
+
+    //string token_literal() const;
 };
+
+//union Statement {
+//    LetStatement let_statement{};
+//
+//    Statement() {
+//        std::construct_at(&let_statement);
+//    }
+//
+//    ~Statement() {
+//        std::destroy_at(&let_statement);
+//    }
+
+    // Copy constructor
+    //Statement(const Statement &) = delete;
+    
+    // Move constructor
+    //Statement(const Statement &&) = delete;
+
+    // Copy assignment
+    //Statement &operator=(const Statement &) = delete;
+
+    // Move assignment
+    //Statement &operator=(Statement &&) = delete;
+//};
+
 
 #endif  // MKS_ATS_
