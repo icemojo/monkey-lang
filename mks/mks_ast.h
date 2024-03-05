@@ -36,8 +36,6 @@ struct Expression {
     Token token;
 
     string token_literal() const;
-
-    string expression_node() const;
 };
 
 //------------------------------------------------------------------------------
@@ -79,29 +77,18 @@ struct LetStatement : Statement {
     //string token_literal() const;
 };
 
-//union Statement {
-//    LetStatement let_statement{};
-//
-//    Statement() {
-//        std::construct_at(&let_statement);
-//    }
-//
-//    ~Statement() {
-//        std::destroy_at(&let_statement);
-//    }
+//  return <expression>;
+struct ReturnStatement : Statement {
+    Token token;
+    Expression value;
 
-    // Copy constructor
-    //Statement(const Statement &) = delete;
-    
-    // Move constructor
-    //Statement(const Statement &&) = delete;
+    ReturnStatement() {
+        token = TokenNew(TokenType::RETURN, "return");
+        value = {};
+    }
 
-    // Copy assignment
-    //Statement &operator=(const Statement &) = delete;
-
-    // Move assignment
-    //Statement &operator=(Statement &&) = delete;
-//};
+    string token_literal() const override;
+};
 
 
 #endif  // MKS_ATS_

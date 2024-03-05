@@ -100,6 +100,15 @@ Parser::parse_statement()
         }
         break;
 
+    case TokenType::RETURN:
+        if (StatementResult<ReturnStatement> return_result = parse_return_statement();
+            return_result.success) {
+            result.success = true;
+            result.statement_ptr = return_result.statement_ptr;
+            return result;
+        }
+        break;
+
     default:
         return result;
     }
@@ -110,7 +119,7 @@ Parser::parse_statement()
 StatementResult<LetStatement>
 Parser::parse_let_statement()
 {
-    StatementResult<LetStatement> result{
+    StatementResult<LetStatement> result = {
         .success = false,
         .statement_ptr = nullptr,
     };
@@ -133,6 +142,27 @@ Parser::parse_let_statement()
 
     // TODO(yemon): Skipping the expression part for now, 
     // since this requires recursive-descent-parsing
+    result.statement_ptr->value = Expression{};
+    while (!is_cur_token(TokenType::SEMICOLON)) {
+        next_token();
+    }
+
+    result.success = true;
+    return result;
+}
+
+StatementResult<ReturnStatement> 
+Parser::parse_return_statement()
+{
+    StatementResult<ReturnStatement> result = {
+        .success = false,
+        .statement_ptr = nullptr,
+    };
+
+    next_token();
+
+    // TODO(yemon): Skipping the expression parsing for now
+    result.statement_ptr = new ReturnStatement();
     result.statement_ptr->value = Expression{};
     while (!is_cur_token(TokenType::SEMICOLON)) {
         next_token();
