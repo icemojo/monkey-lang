@@ -172,6 +172,14 @@ Parser::parse_return_statement()
     return result;
 }
 
+Expression
+Parser::parse_expression()
+{
+    Expression expression;
+
+    return expression;
+}
+
 bool
 Parser::is_cur_token(const TokenType type) const
 {

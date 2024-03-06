@@ -53,6 +53,8 @@ struct Parser {
 
     StatementResult<ReturnStatement> parse_return_statement();
 
+    Expression parse_expression();
+
     bool is_cur_token(const TokenType type) const;
 
     bool is_peek_token(const TokenType type) const;
