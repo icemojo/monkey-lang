@@ -65,5 +65,14 @@ struct ReturnStatement : Statement {
     string token_literal() const override;
 };
 
+// NOTE(yemon): Simply only because Monkey lang will allow this kind of shennanigan,
+//  x + 12;
+struct ExpressionStatement : Statement {
+    Token token;
+    Expression expression;
+
+    string token_literal()  const override;
+};
+
 
 #endif  // MKS_ATS_

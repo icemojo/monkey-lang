@@ -62,124 +62,6 @@ Parser::next_token()
     peek_token = lexer->next_token();
 }
 
-Program *
-Parser::parse_program() 
-{
-    Program *program = new Program{};
-    program->statements = {};
-
-    ParserIter it = ParserIter{ this };
-    while (it.valid()) {
-        if (StatementResult<Statement> result = it->parse_statement(); 
-            result.success) {
-            program->statements.push_back(*result.statement_ptr);
-            delete result.statement_ptr;
-        }
-
-        it.next();
-    }
-
-    return program;
-}
-
-StatementResult<Statement>
-Parser::parse_statement()
-{
-    StatementResult<Statement> result = {
-        .success = false,
-        .statement_ptr = nullptr,
-    };
-
-    switch (cur_token.type) {
-    case TokenType::LET:
-        if (StatementResult<LetStatement> let_result = parse_let_statement();
-            let_result.success) {
-            result.success = true;
-            result.statement_ptr = let_result.statement_ptr;
-            return result;
-        }
-        break;
-
-    case TokenType::RETURN:
-        if (StatementResult<ReturnStatement> return_result = parse_return_statement();
-            return_result.success) {
-            result.success = true;
-            result.statement_ptr = return_result.statement_ptr;
-            return result;
-        }
-        break;
-
-    default:
-        return result;
-    }
-
-    return result;
-}
-
-StatementResult<LetStatement>
-Parser::parse_let_statement()
-{
-    StatementResult<LetStatement> result = {
-        .success = false,
-        .statement_ptr = nullptr,
-    };
-
-    if (!expect_peek(TokenType::IDENT)) {
-        result.success = false;
-        return result;
-    }
-
-    if (!expect_peek(TokenType::ASSIGN)) {
-        result.success = false;
-        return result;
-    }
-
-    result.statement_ptr = new LetStatement();
-    result.statement_ptr->name = Identifier{
-        .token = cur_token,
-        .value = cur_token.literal,
-    };
-
-    // TODO(yemon): Skipping the expression part for now, 
-    // since this requires recursive-descent-parsing
-    result.statement_ptr->value = Expression{};
-    while (!is_cur_token(TokenType::SEMICOLON)) {
-        next_token();
-    }
-
-    result.success = true;
-    return result;
-}
-
-StatementResult<ReturnStatement> 
-Parser::parse_return_statement()
-{
-    StatementResult<ReturnStatement> result = {
-        .success = false,
-        .statement_ptr = nullptr,
-    };
-
-    next_token();
-
-    // TODO(yemon): Skipping the expression parsing for now
-    result.statement_ptr = new ReturnStatement();
-    result.statement_ptr->value = Expression{};
-    while (!is_cur_token(TokenType::SEMICOLON)) {
-        next_token();
-    }
-
-    result.success = true;
-    return result;
-}
-
-Expression
-Parser::parse_expression()
-{
-    Expression expression;
-
-    return expression;
-}
-
 bool
 Parser::is_cur_token(const TokenType type) const
 {
@@ -202,4 +84,130 @@ Parser::expect_peek(const TokenType type)
     else {
         return false;
     }
+}
+
+Program *
+ParseProgram(Parser *parser)
+{
+    Program *program = new Program{};
+    program->statements = {};
+
+    ParserIter it = ParserIter{ parser };
+    while (it.valid()) {
+        if (StatementResult<Statement> result = ParseStatement(*it);
+            result.success) {
+            program->statements.push_back(*result.statement_ptr);
+            delete result.statement_ptr;
+        }
+
+        it.next();
+    }
+
+    return program;
+}
+
+StatementResult<Statement>
+ParseStatement(Parser *parser)
+{
+    StatementResult<Statement> result = {
+        .success = false,
+        .statement_ptr = nullptr,
+    };
+
+    if (parser == nullptr) {
+        return result;
+    }
+
+    switch (parser->cur_token.type) {
+    case TokenType::LET:
+        if (StatementResult<LetStatement> stmt_result = ParseLetStatement(parser);
+            stmt_result.success) {
+            result.success = true;
+            result.statement_ptr = stmt_result.statement_ptr;
+            return result;
+        }
+        break;
+
+    case TokenType::RETURN:
+        if (StatementResult<ReturnStatement> stmt_result = ParseReturnStatement(parser);
+            stmt_result.success) {
+            result.success = true;
+            result.statement_ptr = stmt_result.statement_ptr;
+            return result;
+        }
+        break;
+
+    default:
+        return result;
+    }
+
+    return result;
+}
+
+StatementResult<LetStatement>
+ParseLetStatement(Parser *parser)
+{
+    StatementResult<LetStatement> result = {
+        .success = false,
+        .statement_ptr = nullptr,
+    };
+
+    if (parser == nullptr) {
+        return result;
+    }
+
+    if (!parser->expect_peek(TokenType::IDENT)) {
+        result.success = false;
+        return result;
+    }
+
+    if (!parser->expect_peek(TokenType::ASSIGN)) {
+        result.success = false;
+        return result;
+    }
+
+    // TODO(yemon): Should this be the correct way to initialize this?
+    result.statement_ptr = new LetStatement();
+    result.statement_ptr->name = Identifier{
+        .token = parser->cur_token,
+        .value = parser->cur_token.literal,
+    };
+
+    result.success = true;
+    return result;
+}
+
+StatementResult<ReturnStatement>
+ParseReturnStatement(Parser *parser)
+{
+    StatementResult<ReturnStatement> result = {
+        .success = false,
+        .statement_ptr = nullptr,
+    };
+
+    if (parser == nullptr) {
+        return result;
+    }
+
+    parser->next_token();
+
+    // TODO(yemon): Skipping the expression parsing for now
+    // TODO(yemon): Should this be the correct way to initialize this?
+    result.statement_ptr = new ReturnStatement();   
+    result.statement_ptr->value = Expression{};
+
+    while (!parser->is_cur_token(TokenType::SEMICOLON)) {
+        parser->next_token();
+    }
+
+    result.success = true;
+    return result;
+}
+
+Expression
+ParseExpression(Parser *parser)
+{
+    Expression expression{};
+
+    return expression;
 }

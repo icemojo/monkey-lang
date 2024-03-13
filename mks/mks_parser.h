@@ -45,21 +45,26 @@ struct Parser {
     // pull up the following token into `peek_token`, etc etc.
     void next_token();
 
-    Program *parse_program();
-
-    StatementResult<Statement> parse_statement();
-
-    StatementResult<LetStatement> parse_let_statement();
-
-    StatementResult<ReturnStatement> parse_return_statement();
-
-    Expression parse_expression();
-
     bool is_cur_token(const TokenType type) const;
 
     bool is_peek_token(const TokenType type) const;
 
     bool expect_peek(const TokenType type);
 };
+
+Program *
+ParseProgram(Parser *parser);
+
+StatementResult<Statement>
+ParseStatement(Parser *parser);
+
+StatementResult<LetStatement>
+ParseLetStatement(Parser *parser);
+
+StatementResult<ReturnStatement>
+ParseReturnStatement(Parser *parser);
+
+Expression
+ParseExpression(Parser *parser);
 
 #endif  // MKS_PARSERS_

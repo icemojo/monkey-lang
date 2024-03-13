@@ -28,7 +28,14 @@ LetStatement::token_literal() const
 }
 
 string 
-ReturnStatement::token_literal() const {
+ReturnStatement::token_literal() const 
+{
+    return token.literal;
+}
+
+string
+ExpressionStatement::token_literal() const
+{
     return token.literal;
 }
 
