@@ -4,10 +4,12 @@
 #include <string>
 #include <vector>
 #include <concepts>
+#include <optional>
 #include "mks_lexer.h"
 
 using std::string;
 using std::vector;
+using std::optional;
 
 
 struct Identifier {
@@ -15,18 +17,27 @@ struct Identifier {
     string value;
 
     string token_literal() const;
+
+    string to_string() const;
 };
 
 struct Expression {
     Token token;
 
     string token_literal() const;
+
+    string to_string() const;
 };
+
+std::ostream &
+operator<<(std::ostream &out, const Expression &expression);
 
 //------------------------------------------------------------------------------
 
 struct Statement {
     virtual string token_literal() const;
+
+    virtual string to_string() const;
 };
 
 template <typename T>
@@ -41,7 +52,7 @@ struct StatementResult {
 struct LetStatement : Statement {
     Token token;
     Identifier name;
-    Expression value;
+    optional<Expression> value;
 
     LetStatement() {
         token = TokenNew(TokenType::LET, "let");    //?
@@ -50,12 +61,14 @@ struct LetStatement : Statement {
     }
 
     string token_literal() const override;
+
+    string to_string() const override;
 };
 
 //  return <expression>;
 struct ReturnStatement : Statement {
     Token token;
-    Expression value;
+    optional<Expression> value;
 
     ReturnStatement() {
         token = TokenNew(TokenType::RETURN, "return");
@@ -63,16 +76,22 @@ struct ReturnStatement : Statement {
     }
 
     string token_literal() const override;
+
+    string to_string() const override;
 };
 
 // NOTE(yemon): Simply only because Monkey lang will allow this kind of shennanigan,
+//  let x = 10;
 //  x + 12;
+// Both of those statements above are completely legal, and thus 
+// expressions are dubbed as expression statements.
 struct ExpressionStatement : Statement {
     Token token;
-    Expression expression;
+    optional<Expression> expression;
 
-    string token_literal()  const override;
+    string token_literal() const override;
+
+    string to_string() const override;
 };
-
 
 #endif  // MKS_ATS_

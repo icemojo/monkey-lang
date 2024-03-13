@@ -64,7 +64,7 @@ ParseLetStatement(Parser *parser);
 StatementResult<ReturnStatement>
 ParseReturnStatement(Parser *parser);
 
-Expression
+ExpressionStatement
 ParseExpression(Parser *parser);
 
 #endif  // MKS_PARSERS_

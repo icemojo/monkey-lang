@@ -120,19 +120,19 @@ ParseStatement(Parser *parser)
 
     switch (parser->cur_token.type) {
     case TokenType::LET:
-        if (StatementResult<LetStatement> stmt_result = ParseLetStatement(parser);
-            stmt_result.success) {
+        if (StatementResult<LetStatement> parse_result = ParseLetStatement(parser);
+            parse_result.success) {
             result.success = true;
-            result.statement_ptr = stmt_result.statement_ptr;
+            result.statement_ptr = parse_result.statement_ptr;
             return result;
         }
         break;
 
     case TokenType::RETURN:
-        if (StatementResult<ReturnStatement> stmt_result = ParseReturnStatement(parser);
-            stmt_result.success) {
+        if (StatementResult<ReturnStatement> parse_result = ParseReturnStatement(parser);
+            parse_result.success) {
             result.success = true;
-            result.statement_ptr = stmt_result.statement_ptr;
+            result.statement_ptr = parse_result.statement_ptr;
             return result;
         }
         break;
@@ -204,10 +204,10 @@ ParseReturnStatement(Parser *parser)
     return result;
 }
 
-Expression
+ExpressionStatement
 ParseExpression(Parser *parser)
 {
-    Expression expression{};
+    ExpressionStatement statement{};
 
-    return expression;
+    return statement;
 }
