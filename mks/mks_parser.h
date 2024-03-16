@@ -12,6 +12,8 @@ struct Program {
     vector<Statement> statements{};
 
     string token_literal() const;
+
+    string to_string() const;
 };
 
 //------------------------------------------------------------------------------

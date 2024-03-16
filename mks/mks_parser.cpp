@@ -1,4 +1,4 @@
-#include <iostream>
+#include <sstream>
 #include "mks_parser.h"
 
 
@@ -12,6 +12,23 @@ Program::token_literal() const
         //return statements.at(0).token_literal();
         return "";
     }
+}
+
+string 
+Program::to_string() const
+{
+    // NOTE(yemon): Using std::ostringstream might be more expensive than just 
+    // simple std::string.push_back() when building strings in memory, since streams has
+    // additional formatting and type conversion mechanisms built-in to "stream" strings
+    // from different sources. I'm just leaving this here just for future reference.
+    // This is not based on any special design decisions or anything.
+    std::ostringstream buffer{};
+
+    for (const Statement &statement : statements) {
+        buffer << statement.to_string();
+    }
+
+    return buffer.str();
 }
 
 //------------------------------------------------------------------------------
