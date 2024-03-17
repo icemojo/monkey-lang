@@ -90,7 +90,7 @@ Token::print() const
 }
 
 Token
-TokenNew(TokenType type, byte ch) 
+TokenNew(TokenType type, char ch) 
 {
     return Token{ type, { ch } };
 }
@@ -131,7 +131,7 @@ Lexer::read_char()
     read_position += 1;
 }
 
-byte 
+char 
 Lexer::peek_char() const
 {
     if (read_position >= input.size()) {
@@ -150,7 +150,7 @@ Lexer::next_token()
 
     switch (ch) {
     case '=':
-        if (const byte nch = peek_char(); nch == '=') {
+        if (const char nch = peek_char(); nch == '=') {
             token = TokenNew(TokenType::EQ, { ch, nch });
             read_char();
         }
@@ -159,7 +159,7 @@ Lexer::next_token()
         }
         break;
     case '!':
-        if (const byte nch = peek_char(); nch == '=') {
+        if (const char nch = peek_char(); nch == '=') {
             token = TokenNew(TokenType::NOT_EQ, { ch, nch });
             read_char();
         }
@@ -180,7 +180,7 @@ Lexer::next_token()
         token = TokenNew(TokenType::SLASH, ch);
         break;
     case '<':
-        if (const byte nch = peek_char(); nch == '=') {
+        if (const char nch = peek_char(); nch == '=') {
             token = TokenNew(TokenType::LT_EQ, { ch, nch });
             read_char();
         }
@@ -189,7 +189,7 @@ Lexer::next_token()
         }
         break;
     case '>':
-        if (const byte nch = peek_char(); nch == '=') {
+        if (const char nch = peek_char(); nch == '=') {
             token = TokenNew(TokenType::GT_EQ, { ch, nch });
             read_char();
         }
@@ -322,7 +322,7 @@ LexerNew(const string &input)
 //------------------------------------------------------------------------------
 
 bool 
-ValidIdentifierLetter(const byte c)
+ValidIdentifierLetter(const char c)
 {
     // A-Z, a-z, _
     return (c >= 65 && c <= 90) || (c >= 97 && c <= 122) || c == 95;

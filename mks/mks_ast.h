@@ -9,28 +9,47 @@
 
 using std::string;
 using std::vector;
-using std::optional;
+using std::optional, std::make_optional;
 
-
-struct Identifier {
-    Token token;
-    string value;
-
-    string token_literal() const;
-
-    string to_string() const;
-};
 
 struct Expression {
     Token token;
 
-    string token_literal() const;
+    virtual string token_literal() const;
 
-    string to_string() const;
+    virtual string to_string() const;
 };
 
 std::ostream &
 operator<<(std::ostream &out, const Expression &expression);
+
+struct Identifier : Expression {
+    //Token token;
+    string value;
+
+    string token_literal() const override;
+
+    string to_string() const override;
+};
+
+struct IdentifierResult {
+    bool success{ false };
+    Identifier identifier;
+};
+
+struct IntegerLiteral : Expression {
+    //Token token;
+    int64_t value;
+
+    string token_literal() const override;
+
+    string to_string() const override;
+};
+
+struct IntegerLiteralResult {
+    bool success{ false };
+    IntegerLiteral int_literal;
+};
 
 //------------------------------------------------------------------------------
 

@@ -12,16 +12,6 @@ using std::vector;
 using std::unordered_map;
 using std::unique_ptr, std::make_unique;
 
-using byte   = char;
-using ubyte  = unsigned char;
-using ushort = unsigned short;
-using i16    = short;
-using i32    = int;
-using u16    = unsigned short;
-using u32    = unsigned int;
-using i64    = long long;
-using u64    = unsigned long long;
-
 
 enum class TokenType {
     ILLEGAL,
@@ -90,7 +80,7 @@ struct Token {
 };
 
 Token
-TokenNew(TokenType type, byte ch);
+TokenNew(TokenType type, char ch);
 
 Token
 TokenNew(TokenType type, const string &literal);
@@ -102,13 +92,13 @@ CheckKeywordOrIdentifier(const string_view &identifier);
 
 struct Lexer {
     string input{};
-    i32 position = 0;       // current position in the input
-    i32 read_position = 0;  // current reading position, 1 char ahead of the current one
-    byte ch = '\0';
+    int32_t position = 0;       // current position in the input
+    int32_t read_position = 0;  // current reading position, 1 char ahead of the current one
+    char ch = '\0';
 
     void read_char();
 
-    byte peek_char() const;
+    char peek_char() const;
 
     Token next_token();
 
@@ -129,6 +119,6 @@ LexerNew(const string &input);
 //------------------------------------------------------------------------------
 
 bool
-ValidIdentifierLetter(const byte c);
+ValidIdentifierLetter(const char c);
 
 #endif // MKS_LEXER_H_

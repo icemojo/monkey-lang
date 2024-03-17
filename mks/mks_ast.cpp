@@ -2,18 +2,6 @@
 #include "mks_ast.h"
 
 
-string 
-Identifier::token_literal() const
-{
-    return token.literal;
-}
-
-string 
-Identifier::to_string() const
-{
-    return value;
-}
-
 string
 Expression::token_literal() const
 {
@@ -30,6 +18,30 @@ std::ostream &
 operator<<(std::ostream &out, const Expression &expression) 
 {
     return out << expression.token_literal();
+}
+
+string 
+Identifier::token_literal() const
+{
+    return token.literal;
+}
+
+string 
+Identifier::to_string() const
+{
+    return value;
+}
+
+string
+IntegerLiteral::token_literal() const
+{
+    return token.literal;
+}
+
+string
+IntegerLiteral::to_string() const
+{
+    return token_literal();
 }
 
 //------------------------------------------------------------------------------

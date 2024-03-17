@@ -1,11 +1,17 @@
 #ifndef MKS_PARSER_
 #define MKS_PARSER_
 
+#include <string>
+#include <vector>
 #include <memory>
+#include <optional>
 #include "mks_lexer.h"
 #include "mks_ast.h"
 
+using std::string;
+using std::vector;
 using std::unique_ptr;
+using std::make_optional, std::nullopt;
 
 
 struct Program {
@@ -40,6 +46,8 @@ struct Parser {
     Token cur_token = {};
     Token peek_token = {};
 
+    vector<string> errors = {};
+
     // NOTE(yemon): `next_token()` sort of "stream up" the tokens from the lexer.
     // IOW, calling this once on an empty parser will assign the `peek_token` first,
     // while leaving the `cur_token` as default/empty.
@@ -66,7 +74,32 @@ ParseLetStatement(Parser *parser);
 StatementResult<ReturnStatement>
 ParseReturnStatement(Parser *parser);
 
+enum class Prec {
+    LOWEST = 0,
+    EQUALS,         // ==
+    LESS_GREATER,   // < or >
+    SUM,            // +
+    PRODUCT,        // *
+    PREFIX,         // -x or !x
+    CALL,           // doSomething(x)
+};
+
+StatementResult<ExpressionStatement>
+ParseExpressionStatement(Parser *parser);
+
 ExpressionStatement
-ParseExpression(Parser *parser);
+ParseExpression(Parser *parser, const Prec prec);
+
+Expression
+ParseIdentifier(Parser *parser);
+
+Expression
+ParseIntegerLiteral(Parser *parser);
+
+Expression
+PrefixParseFn();
+
+Expression
+InfixParseFn(Expression lhs);
 
 #endif  // MKS_PARSERS_
