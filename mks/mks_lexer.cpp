@@ -105,14 +105,14 @@ TokenType
 CheckKeywordOrIdentifier(const string_view &identifier)
 {
     if (KEYWORDS.size() == 0) {
-        return TokenType::IDENT;
+        return TokenType::ILLEGAL;
     }
 
     if (const auto search_it = KEYWORDS.find(identifier); search_it != KEYWORDS.end()) {
         return search_it->second;
     }
 
-    return TokenType::IDENT;
+    return TokenType::ILLEGAL;
 }
 
 //------------------------------------------------------------------------------

@@ -51,6 +51,29 @@ struct IntegerLiteralResult {
     IntegerLiteral int_literal;
 };
 
+//  <prefix operator><expression>;
+struct PrefixExpression : Expression {
+    //Token token;
+    string optr;        // operator; like !, -, etc.
+    Expression right;
+
+    string token_literal() const override;
+
+    string to_string() const override;
+};
+
+//  <expression><infix operator><expression>
+struct InfixExpression : Expression {
+    //Token token;
+    Expression left;
+    string optr;        // operator; +, <, >=, ==, !=, etc.
+    Expression right;
+
+    string token_literal() const override;
+
+    string to_string() const override;
+};
+
 //------------------------------------------------------------------------------
 
 struct Statement {

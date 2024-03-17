@@ -44,6 +44,32 @@ IntegerLiteral::to_string() const
     return token_literal();
 }
 
+string
+PrefixExpression::token_literal() const
+{
+    return token.literal;
+}
+
+#include <format>
+
+string
+PrefixExpression::to_string() const
+{
+    return string{ std::format("({}{})", optr, right.to_string()) };
+}
+
+string 
+InfixExpression::token_literal() const
+{
+    return token.literal;
+}
+
+string
+InfixExpression::to_string() const
+{
+    return string{ std::format("({}{}{})", left.to_string(), optr, right.to_string()) };
+}
+
 //------------------------------------------------------------------------------
 
 string 

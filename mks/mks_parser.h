@@ -5,6 +5,7 @@
 #include <vector>
 #include <memory>
 #include <optional>
+#include <unordered_map>
 #include "mks_lexer.h"
 #include "mks_ast.h"
 
@@ -62,6 +63,8 @@ struct Parser {
     bool expect_peek(const TokenType type);
 };
 
+//------------------------------------------------------------------------------
+
 Program *
 ParseProgram(Parser *parser);
 
@@ -76,13 +79,28 @@ ParseReturnStatement(Parser *parser);
 
 enum class Prec {
     LOWEST = 0,
-    EQUALS,         // ==
-    LESS_GREATER,   // < or >
-    SUM,            // +
-    PRODUCT,        // *
+    EQUALS,         // ==, !=
+    LESS_GREATER,   // <, >
+    SUM,            // +, -
+    PRODUCT,        // *, /
     PREFIX,         // -x or !x
     CALL,           // doSomething(x)
 };
+
+static const unordered_map<TokenType, Prec>
+PRECEDENCES = {
+    {TokenType::EQ, Prec::EQUALS},
+    {TokenType::NOT_EQ, Prec::EQUALS},
+    {TokenType::LT, Prec::LESS_GREATER},
+    {TokenType::GT, Prec::LESS_GREATER},
+    {TokenType::PLUS, Prec::SUM},
+    {TokenType::MINUS, Prec::SUM},
+    {TokenType::ASTRISK, Prec::PRODUCT},
+    {TokenType::SLASH, Prec::PRODUCT},
+};
+
+Prec
+CheckPrecedence(const TokenType &token_type);
 
 StatementResult<ExpressionStatement>
 ParseExpressionStatement(Parser *parser);
@@ -95,6 +113,12 @@ ParseIdentifier(Parser *parser);
 
 Expression
 ParseIntegerLiteral(Parser *parser);
+
+Expression
+ParsePrefixExpression(Parser *parser);
+
+Expression
+ParseInfixExpression(Parser *parser, const Expression &left);
 
 Expression
 PrefixParseFn();

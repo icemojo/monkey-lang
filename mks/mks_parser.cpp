@@ -104,6 +104,8 @@ Parser::expect_peek(const TokenType type)
     }
 }
 
+//------------------------------------------------------------------------------
+
 Program *
 ParseProgram(Parser *parser)
 {
@@ -226,6 +228,16 @@ ParseReturnStatement(Parser *parser)
     return result;
 }
 
+Prec
+CheckPrecedence(const TokenType &token_type)
+{
+    if (const auto search_it = PRECEDENCES.find(token_type); 
+        search_it != PRECEDENCES.end()) {
+        return search_it->second;
+    }
+    return Prec::LOWEST;
+}
+
 StatementResult<ExpressionStatement>
 ParseExpressionStatement(Parser *parser)
 {
@@ -253,34 +265,73 @@ ParseExpressionStatement(Parser *parser)
     return result;
 }
 
-// TODO(yemon): This should probably be combined with 
-// `ParseExpressionStatement(..)` above anyway, I think.
+// TODO(yemon): Could this be simplified better in relation to the
+// `ParseExpressionStatement(..)` above?
 ExpressionStatement
 ParseExpression(Parser *parser, const Prec prec)
 {
-    ExpressionStatement statement{};
+    ExpressionStatement left_exp_statement{};
     if (parser == nullptr) {
-        return statement;
+        return left_exp_statement;
     }
 
+    // Prefix expressions
     switch (parser->cur_token.type) {
-    case TokenType::IDENT: {
-        Expression ident_exp = ParseIdentifier(parser);
-        statement.expression = ident_exp;
-    }
-    break;
+    case TokenType::IDENT: 
+        left_exp_statement.expression = ParseIdentifier(parser);
+        break;
     
-    case TokenType::INT: {
-        Expression int_exp = ParseIntegerLiteral(parser);
-        statement.expression = int_exp;
-    }
-    break;
+    case TokenType::INT:
+        left_exp_statement.expression = ParseIntegerLiteral(parser);
+        break;
+
+    case TokenType::BANG:
+    case TokenType::MINUS:
+        // TODO(yemon): Distinguish between the prefix '!' and the infix '!='?
+        // TODO(yemon): Distinguish between the prefix '-' and the infix '-'?
+        // NOTE(yemon): The original mechanism in the book relies on having *two* 
+        // different maps (with essentially, function pointers), first one for prefixes,
+        // and second one for the infixes. So, if a particular token type is not found
+        // in the first 'prefix' map first, then the following cases can be handled easily.
+        // But... I feel like relying on two different maps with function pointers here
+        // is kinda pointless. We want power, and control here.
+        left_exp_statement.expression = ParsePrefixExpression(parser);
+        break;
 
     default:
+        // TODO(yemon): Should there be some sort of error reporting here,
+        // if none of the valid expression-like tokens were recognized?
+        // Maybe tag the error messages based on the current token type,
+        // so that new (or missed-out) tokens can be caught here basically.
         break;
     }
 
-    return statement;
+    // Infix expression(s)
+    const Prec next_token_prec = CheckPrecedence(parser->peek_token.type);
+    while (!parser->is_peek_token(TokenType::SEMICOLON) && prec < next_token_prec) {
+        parser->next_token();
+
+        switch (parser->cur_token.type) {
+        case TokenType::PLUS:
+        case TokenType::MINUS:
+        case TokenType::ASTRISK:
+        case TokenType::SLASH:
+        case TokenType::EQ:
+        case TokenType::NOT_EQ:
+        case TokenType::LT:
+        case TokenType::GT: {
+            ExpressionStatement right_exp_statement{};
+            right_exp_statement.expression = ParseInfixExpression(
+                parser, *(left_exp_statement.expression));
+        } break;
+
+        default:
+            // TODO(yemon): Error handling and reporting?
+            return left_exp_statement;
+        }
+    }
+
+    return left_exp_statement;
 }
 
 Expression
@@ -307,5 +358,37 @@ ParseIntegerLiteral(Parser *parser)
     int_literal.value = value;
 
     return int_literal;
+}
+
+Expression
+ParsePrefixExpression(Parser *parser)
+{
+    PrefixExpression prefix_expression{};
+    prefix_expression.token = parser->cur_token;
+    prefix_expression.optr = parser->cur_token.literal;
+
+    parser->next_token();
+
+    ExpressionStatement exp_statement = ParseExpression(parser, Prec::PREFIX);
+    prefix_expression.right = *(exp_statement.expression);
+
+    return prefix_expression;
+}
+
+Expression
+ParseInfixExpression(Parser *parser, const Expression &left)
+{
+    InfixExpression infix_expression{};
+    infix_expression.token = parser->cur_token;
+    infix_expression.optr  = parser->cur_token.literal;
+    infix_expression.left = left;
+
+    const Prec prec = CheckPrecedence(parser->cur_token.type);
+    parser->next_token();
+    
+    ExpressionStatement right_exp_statement = ParseExpression(parser, prec);
+    infix_expression.right = *(right_exp_statement.expression);
+
+    return infix_expression;
 }
 
