@@ -96,6 +96,8 @@ struct Lexer {
     int32_t read_position = 0;  // current reading position, 1 char ahead of the current one
     char ch = '\0';
 
+    Lexer(const string &input) : input(input) {}
+
     void read_char();
 
     char peek_char() const;

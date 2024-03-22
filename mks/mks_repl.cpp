@@ -46,6 +46,9 @@ ReplStart(const Options &options)
     bool should_quit = false;
     std::string input_buffer{};
 
+    unique_ptr<Lexer> lexer;
+    unique_ptr<Parser> parser;
+
     while (!should_quit) {
         std::cout << PROMPT;
         std::getline(std::cin, input_buffer);
@@ -58,12 +61,19 @@ ReplStart(const Options &options)
             continue;
         }
 
-        unique_ptr<Lexer> lexer = LexerNew(input_buffer);
+        lexer = LexerNew(input_buffer);
         input_buffer.clear();
-        Parser *parser = ParserNew(lexer);
+        parser = ParserNew(move(lexer));
 
         if (options.verbose) {
             parser->lexer->print_tokens();
         }
+
+        Program *program = ParseProgram(&(*parser));
+        if (options.verbose) {
+            program->to_string();
+        }
+
+        parser.reset();
     }
 }

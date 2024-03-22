@@ -27,8 +27,8 @@ struct Program {
 
 struct Parser;
 
-Parser *
-ParserNew(unique_ptr<Lexer> &lexer);
+unique_ptr<Parser>
+ParserNew(unique_ptr<Lexer> lexer);
 
 struct ParserIter {
     Parser *parser{};

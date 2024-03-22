@@ -34,12 +34,11 @@ Program::to_string() const
 
 //------------------------------------------------------------------------------
 
-Parser *
-ParserNew(unique_ptr<Lexer> &lexer)
+unique_ptr<Parser>
+ParserNew(unique_ptr<Lexer> lexer)
 {
-    Parser *parser = new Parser{
-        .lexer = move(lexer),
-    };
+    auto parser = make_unique<Parser>();
+    parser->lexer = move(lexer);
 
     // Read two tokens, so that current token and peek tokens are set
     parser->next_token();

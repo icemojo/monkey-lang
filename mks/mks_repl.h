@@ -2,9 +2,11 @@
 #define MKS_REPL_
 
 #include <string>
+#include <memory>
 
 using std::string;
 using std::string_view;
+using std::unique_ptr, std::move;
 
 
 static const string_view PROMPT = ">> ";
