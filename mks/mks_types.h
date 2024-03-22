@@ -11,6 +11,10 @@ namespace mks
 struct stoi_result {
     bool success{ false };
     int32_t value{ 0 };
+
+    int32_t operator*() const {
+        return value;
+    }
 };
 
 [[nodiscard]]
@@ -40,6 +44,10 @@ stoi_result stoi(const std::string &str)
 struct stoll_result {
     bool success{ false };
     int64_t value{ 0 };
+
+    int64_t operator*() const {
+        return value;
+    }
 };
 
 [[nodiscard]]

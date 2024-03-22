@@ -61,7 +61,7 @@ operator<<(std::ostream &out, const TokenType token_type);
 
 //------------------------------------------------------------------------------
 
-static const unordered_map<string_view, TokenType> 
+inline const unordered_map<string_view, TokenType> 
 KEYWORDS = {
     {"let", TokenType::LET},
     {"fn", TokenType::FUNCTION},

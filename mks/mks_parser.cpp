@@ -38,7 +38,7 @@ Parser *
 ParserNew(unique_ptr<Lexer> &lexer)
 {
     Parser *parser = new Parser{
-        .lexer = std::move(lexer),
+        .lexer = move(lexer),
     };
 
     // Read two tokens, so that current token and peek tokens are set
@@ -265,15 +265,19 @@ ParseExpressionStatement(Parser *parser)
     return result;
 }
 
-// TODO(yemon): Could this be simplified better in relation to the
-// `ParseExpressionStatement(..)` above?
+// TODO(yemon): Could this be simplified better (and possibly combined with) 
+// in relation to the `ParseExpressionStatement(..)` above?
 ExpressionStatement
 ParseExpression(Parser *parser, const Prec prec)
 {
     ExpressionStatement left_exp_statement{};
-    if (parser == nullptr) {
-        return left_exp_statement;
-    }
+
+    // NOTE(yemon): The original mechanism in the book relies on having *two* 
+    // different maps (with essentially, function pointers), first one for prefixes,
+    // and second one for the infixes. So, if a particular token type is not found
+    // in the first 'prefix' map first, then the following cases can be handled easily.
+    // But... I feel like relying on two different maps with function pointers here
+    // is kinda pointless. So I went with a simple double-switch-blocks here.
 
     // Prefix expressions
     switch (parser->cur_token.type) {
@@ -287,14 +291,6 @@ ParseExpression(Parser *parser, const Prec prec)
 
     case TokenType::BANG:
     case TokenType::MINUS:
-        // TODO(yemon): Distinguish between the prefix '!' and the infix '!='?
-        // TODO(yemon): Distinguish between the prefix '-' and the infix '-'?
-        // NOTE(yemon): The original mechanism in the book relies on having *two* 
-        // different maps (with essentially, function pointers), first one for prefixes,
-        // and second one for the infixes. So, if a particular token type is not found
-        // in the first 'prefix' map first, then the following cases can be handled easily.
-        // But... I feel like relying on two different maps with function pointers here
-        // is kinda pointless. We want power, and control here.
         left_exp_statement.expression = ParsePrefixExpression(parser);
         break;
 
@@ -306,7 +302,7 @@ ParseExpression(Parser *parser, const Prec prec)
         break;
     }
 
-    // Infix expression(s)
+    // Infix expressions
     const Prec next_token_prec = CheckPrecedence(parser->peek_token.type);
     while (!parser->is_peek_token(TokenType::SEMICOLON) && prec < next_token_prec) {
         parser->next_token();
@@ -323,6 +319,7 @@ ParseExpression(Parser *parser, const Prec prec)
             ExpressionStatement right_exp_statement{};
             right_exp_statement.expression = ParseInfixExpression(
                 parser, *(left_exp_statement.expression));
+            left_exp_statement = right_exp_statement;       // ?
         } break;
 
         default:
@@ -344,13 +341,13 @@ ParseIdentifier(Parser *parser)
     return identifier;
 }
 
-Expression
+IntegerLiteral
 ParseIntegerLiteral(Parser *parser)
 {
     int64_t value = 0;
-    if (mks::stoll_result i64_result = mks::stoll(parser->cur_token.literal);
-        i64_result.success) {
-        value = i64_result.value;
+    if (mks::stoll_result result = mks::stoll(parser->cur_token.literal);
+        result.success) {
+        value = *result;
     }
 
     IntegerLiteral int_literal{};
@@ -360,7 +357,7 @@ ParseIntegerLiteral(Parser *parser)
     return int_literal;
 }
 
-Expression
+PrefixExpression
 ParsePrefixExpression(Parser *parser)
 {
     PrefixExpression prefix_expression{};
@@ -375,7 +372,7 @@ ParsePrefixExpression(Parser *parser)
     return prefix_expression;
 }
 
-Expression
+InfixExpression
 ParseInfixExpression(Parser *parser, const Expression &left)
 {
     InfixExpression infix_expression{};

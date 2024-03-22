@@ -11,7 +11,7 @@
 
 using std::string;
 using std::vector;
-using std::unique_ptr;
+using std::unique_ptr, std::move;
 using std::make_optional, std::nullopt;
 
 
@@ -87,7 +87,7 @@ enum class Prec {
     CALL,           // doSomething(x)
 };
 
-static const unordered_map<TokenType, Prec>
+inline const unordered_map<TokenType, Prec>
 PRECEDENCES = {
     {TokenType::EQ, Prec::EQUALS},
     {TokenType::NOT_EQ, Prec::EQUALS},
@@ -111,13 +111,13 @@ ParseExpression(Parser *parser, const Prec prec);
 Expression
 ParseIdentifier(Parser *parser);
 
-Expression
+IntegerLiteral
 ParseIntegerLiteral(Parser *parser);
 
-Expression
+PrefixExpression
 ParsePrefixExpression(Parser *parser);
 
-Expression
+InfixExpression
 ParseInfixExpression(Parser *parser, const Expression &left);
 
 Expression
