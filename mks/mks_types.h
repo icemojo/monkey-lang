@@ -37,6 +37,7 @@ stoi_result stoi(const std::string &str)
         return result;
     }
 
+    result.success = true;
     result.value = value;
     return result;
 }
@@ -69,6 +70,7 @@ stoll_result stoll(const std::string &str)
         return result;
     }
 
+    result.success = true;
     result.value = value;
     return result;
 }

@@ -60,18 +60,6 @@ ParserIter::next()
     parser->next_token();
 }
 
-Parser *
-ParserIter::operator*() const
-{
-    return parser;
-}
-
-Parser *
-ParserIter::operator->() const
-{
-    return parser;
-}
-
 void
 Parser::next_token()
 {
@@ -113,7 +101,7 @@ ParseProgram(Parser *parser)
 
     ParserIter it = ParserIter{ parser };
     while (it.valid()) {
-        if (StatementResult<Statement> result = ParseStatement(*it);
+        if (StatementResult<Statement> result = ParseStatement(it.parser);
             result.success) {
             program->statements.push_back(*result.statement_ptr);
             delete result.statement_ptr;
@@ -256,6 +244,7 @@ ParseExpressionStatement(Parser *parser)
     expression->expression = exp_statement.expression;
 
     result.statement_ptr = expression;
+    result.success = true;
     
     if (parser->is_peek_token(TokenType::SEMICOLON)) {
         parser->next_token();
@@ -280,18 +269,24 @@ ParseExpression(Parser *parser, const Prec prec)
 
     // Prefix expressions
     switch (parser->cur_token.type) {
-    case TokenType::IDENT: 
-        left_exp_statement.expression = ParseIdentifier(parser);
-        break;
+    case TokenType::IDENT: {
+        Expression result_exp = ParseIdentifier(parser);
+        left_exp_statement.token = result_exp.token;
+        left_exp_statement.expression = result_exp;
+    } break;
     
-    case TokenType::INT:
-        left_exp_statement.expression = ParseIntegerLiteral(parser);
-        break;
+    case TokenType::INT: {
+        IntegerLiteral result_exp = ParseIntegerLiteral(parser);
+        left_exp_statement.token = result_exp.token;
+        left_exp_statement.expression = result_exp;
+    } break;
 
     case TokenType::BANG:
-    case TokenType::MINUS:
-        left_exp_statement.expression = ParsePrefixExpression(parser);
-        break;
+    case TokenType::MINUS: {
+        PrefixExpression result_exp = ParsePrefixExpression(parser);
+        left_exp_statement.token = result_exp.token;
+        left_exp_statement.expression = result_exp;
+    } break;
 
     default:
         // TODO(yemon): Should there be some sort of error reporting here,
@@ -316,9 +311,13 @@ ParseExpression(Parser *parser, const Prec prec)
         case TokenType::LT:
         case TokenType::GT: {
             ExpressionStatement right_exp_statement{};
-            right_exp_statement.expression = ParseInfixExpression(
-                parser, *(left_exp_statement.expression));
-            left_exp_statement = right_exp_statement;       // ?
+            InfixExpression result_exp = ParseInfixExpression(
+                parser, 
+                *(left_exp_statement.expression)
+            );
+            right_exp_statement.token = result_exp.token;
+            right_exp_statement.expression = result_exp;
+            //left_exp_statement = right_exp_statement;       // ?
         } break;
 
         default:

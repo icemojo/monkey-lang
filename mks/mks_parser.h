@@ -36,10 +36,6 @@ struct ParserIter {
     [[nodiscard]] bool valid() const;
 
     void next();
-
-    Parser * operator*() const;
-    
-    Parser * operator->() const;
 };
 
 struct Parser {
@@ -119,11 +115,5 @@ ParsePrefixExpression(Parser *parser);
 
 InfixExpression
 ParseInfixExpression(Parser *parser, const Expression &left);
-
-Expression
-PrefixParseFn();
-
-Expression
-InfixParseFn(Expression lhs);
 
 #endif  // MKS_PARSERS_

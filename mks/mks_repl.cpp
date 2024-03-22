@@ -62,18 +62,18 @@ ReplStart(const Options &options)
         }
 
         lexer = LexerNew(input_buffer);
-        input_buffer.clear();
         parser = ParserNew(move(lexer));
 
         if (options.verbose) {
-            parser->lexer->print_tokens();
+            unique_ptr<Lexer> debug_lexer = LexerNew(input_buffer);
+            debug_lexer->print_tokens();
         }
 
         Program *program = ParseProgram(&(*parser));
         if (options.verbose) {
-            program->to_string();
+            std::cout << program->to_string() << std::endl;
         }
 
-        parser.reset();
+        input_buffer.clear();
     }
 }
