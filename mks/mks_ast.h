@@ -4,136 +4,264 @@
 #include <string>
 #include <vector>
 #include <concepts>
-#include <optional>
+//#include <optional>
+#include <variant>
+#include <cassert>
 #include "mks_lexer.h"
 
 using std::string;
 using std::vector;
-using std::optional, std::make_optional;
+//using std::optional, std::make_optional;
+//using std::variant, std::get_if;
 
 
-struct Expression {
+//struct Expression {
+//    Token token;
+//
+//    virtual string token_literal() const;
+//
+//    virtual string to_string() const;
+//};
+//
+//std::ostream &
+//operator<<(std::ostream &out, const Expression1 &expression);
+
+struct Identifier { // : Expression {
     Token token;
-
-    virtual string token_literal() const;
-
-    virtual string to_string() const;
-};
-
-std::ostream &
-operator<<(std::ostream &out, const Expression &expression);
-
-struct Identifier : Expression {
-    //Token token;
     string value;
 
-    string token_literal() const override;
+    Identifier() {}
+    ~Identifier() {}
 
-    string to_string() const override;
+    string token_literal() const;
+
+    string to_string() const;
 };
 
-struct IdentifierResult {
-    bool success{ false };
-    Identifier identifier;
-};
+//struct IdentifierResult {
+//    bool success{ false };
+//    Identifier identifier;
+//};
 
-struct IntegerLiteral : Expression {
-    //Token token;
+//  <integer literal>
+struct IntegerLiteral { // : Expression {
+    Token token;
     int64_t value;
 
-    string token_literal() const override;
+    IntegerLiteral() {}
+    ~IntegerLiteral() {}
 
-    string to_string() const override;
+    string token_literal() const;
+
+    string to_string() const;
 };
 
-struct IntegerLiteralResult {
-    bool success{ false };
-    IntegerLiteral int_literal;
-};
+//struct IntegerLiteralResult {
+//    bool success;
+//    IntegerLiteral int_literal;
+//};
 
 //  <prefix operator><expression>;
-struct PrefixExpression : Expression {
-    //Token token;
+struct PrefixExpression { // : Expression {
+    Token token;
     string optr;        // operator; like !, -, etc.
     Expression right;
 
-    string token_literal() const override;
+    PrefixExpression() {}
+    ~PrefixExpression() {}
 
-    string to_string() const override;
+    string token_literal() const;
+
+    string to_string() const;
 };
 
 //  <expression><infix operator><expression>
-struct InfixExpression : Expression {
-    //Token token;
+struct InfixExpression { // : Expression {
+    Token token;
     Expression left;
     string optr;        // operator; +, <, >=, ==, !=, etc.
     Expression right;
 
-    string token_literal() const override;
+    InfixExpression() {}
+    ~InfixExpression() {}
 
-    string to_string() const override;
+    string token_literal() const;
+
+    string to_string() const;
 };
+
+
+enum class ExpressionType {
+    INVALID = 0,
+    IDENT,
+    INT_LIT,
+    PREFIX,
+    INFIX,
+};
+
+using ExpressionVariant = std::variant<Identifier, 
+                                       IntegerLiteral, 
+                                       PrefixExpression, 
+                                       InfixExpression>;
+
+struct Expression {
+    ExpressionType type;
+    ExpressionVariant variant;
+
+    Expression() {
+        type = ExpressionType::INVALID;
+    }
+
+    //Expression(ExpressionType type, ExpressionVariant variant) : 
+    //    type(type), 
+    //    variant(variant) 
+    //{}
+
+    //Expression(Identifier identifier) {
+    //    type = ExpressionType::IDENT;
+    //    variant.emplace<Identifier>(identifier);
+    //}
+
+    template <typename V>
+    Expression(ExpressionType type, V v) : type(type) {
+        assert(std::holds_alternative<V>(v));
+        variant.emplace<V>(v);
+    }
+
+    template <typename V>
+    Expression(const Expression &other) {
+        type = other.type;
+        assert(std::holds_alternative<V>(other.variant));
+        variant.emplace<V>(other.variant);
+    }
+
+    template <typename V>
+    Expression &operator=(const Expression &other) {
+        type = other.type;
+        assert(std::holds_alternative<V>(other.variant));
+        variant.emplace<V>(other.variant);
+    }
+
+    ~Expression() {}
+};
+
+string ExpressionToString(const Expression &expression);
 
 //------------------------------------------------------------------------------
 
-struct Statement {
-    virtual string token_literal() const;
-
-    virtual string to_string() const;
-};
-
-template <typename T>
-struct StatementResult {
-    bool success{ false };
-    T *statement_ptr{ nullptr };
-
-    static_assert(std::derived_from<T, Statement>, "Type T of StatementResult<T> must be derived from Statement.");
-};
-
 //  let <identifier> = <expression>;
-struct LetStatement : Statement {
+struct LetStatement {
     Token token;
     Identifier name;
-    optional<Expression> value;
+    //optional<Expression> value;
+    Expression value;
 
-    LetStatement() {
-        token = TokenNew(TokenType::LET, "let");    //?
-        name = {},
-        value = {};
+    LetStatement() {}
+
+    LetStatement(Identifier identifier) {
+        token = TokenNew(TokenType::LET, "let");
+        name = identifier;
+        //value = {};
     }
 
-    string token_literal() const override;
+    ~LetStatement() = default;
 
-    string to_string() const override;
+    string token_literal() const;
+
+    string to_string() const;
 };
 
 //  return <expression>;
-struct ReturnStatement : Statement {
+struct ReturnStatement {
     Token token;
-    optional<Expression> value;
+    //optional<Expression> value;
+    Expression value;
 
     ReturnStatement() {
         token = TokenNew(TokenType::RETURN, "return");
-        value = {};
+        //value = {};
     }
 
-    string token_literal() const override;
+    ~ReturnStatement() = default;
 
-    string to_string() const override;
+    string token_literal() const;
+
+    string to_string() const;
 };
 
 // NOTE(yemon): Simply only because Monkey lang will allow this kind of shennanigan,
-//  let x = 10;
-//  x + 12;
-// Both of those statements above are completely legal, and thus 
+//  let x = 10;         let <identifier> = <int-literal>;
+//  let c = a + 2;      let <identifier> = <infix-expression>;
+//  ++b;                <prefix-expression-statement>;
+//  x + 32;             <infix-expression-statement>;
+//  return 12;          return <int-literal>;
+//  return a + b;       return <infix-expression>;
+// All of those statements above are completely legal, and thus 
 // expressions are dubbed as expression statements.
-struct ExpressionStatement : Statement {
+struct ExpressionStatement {
     Token token;
-    optional<Expression> expression;
+    //optional<Expression> expression;
+    Expression expression;
 
-    string token_literal() const override;
+    ExpressionStatement() = default;
+    ~ExpressionStatement() = default;
 
-    string to_string() const override;
+    string token_literal() const;
+
+    string to_string() const;
 };
+
+enum class StatementType {
+    INVALID = 0,
+    LET,
+    RETURN,
+    EXPRESSION
+};
+
+using StatementVariant = std::variant<LetStatement, 
+                                      ReturnStatement,
+                                      ExpressionStatement>;
+
+struct Statement {
+    StatementType type;
+    StatementVariant variant;
+
+    Statement() {
+        type = StatementType::INVALID;
+        //variant = {};
+    }
+
+    //Statement(StatementType type, StatementVariant variant) : 
+    //    type(type), 
+    //    variant(variant) 
+    //{}
+
+    template <typename V>
+    Statement(StatementType type, V v) : type(type) {
+        assert(std::holds_alternative<V>(v));
+        variant.emplace<V>(v);
+    }
+
+    ~Statement() = default;
+};
+
+string StatementToString(const Statement &statement);
+
+struct StatementResult {
+    bool success{ false };
+    Statement statement;
+
+    StatementResult() : success(false) {}
+};
+
+//template <typename T>
+//struct StatementResult {
+//    bool success{ false };
+//    T statement;
+    //T *statement_ptr{ nullptr };
+
+    //static_assert(std::derived_from<T, Statement>, "Type T of StatementResult<T> must be derived from Statement.");
+//};
+
 
 #endif  // MKS_ATS_

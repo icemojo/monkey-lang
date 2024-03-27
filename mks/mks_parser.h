@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <optional>
+//#include <optional>
 #include <unordered_map>
 #include "mks_lexer.h"
 #include "mks_ast.h"
@@ -12,7 +12,7 @@
 using std::string;
 using std::vector;
 using std::unique_ptr, std::move;
-using std::make_optional, std::nullopt;
+//using std::make_optional, std::nullopt;
 
 
 struct Program {
@@ -64,13 +64,13 @@ struct Parser {
 Program *
 ParseProgram(Parser *parser);
 
-StatementResult<Statement>
+StatementResult //<Statement>
 ParseStatement(Parser *parser);
 
-StatementResult<LetStatement>
+StatementResult //<LetStatement>
 ParseLetStatement(Parser *parser);
 
-StatementResult<ReturnStatement>
+StatementResult //<ReturnStatement>
 ParseReturnStatement(Parser *parser);
 
 enum class Prec {
@@ -98,13 +98,15 @@ PRECEDENCES = {
 Prec
 CheckPrecedence(const TokenType &token_type);
 
-StatementResult<ExpressionStatement>
+//StatementResult<ExpressionStatement>
+ExpressionStatement
 ParseExpressionStatement(Parser *parser);
 
 ExpressionStatement
 ParseExpression(Parser *parser, const Prec prec);
 
-Expression
+//Expression
+Identifier
 ParseIdentifier(Parser *parser);
 
 IntegerLiteral

@@ -2,23 +2,23 @@
 #include "mks_ast.h"
 
 
-string
-Expression::token_literal() const
-{
-    return token.literal;
-}
-
-string
-Expression::to_string() const
-{
-    return token_literal();
-}
-
-std::ostream &
-operator<<(std::ostream &out, const Expression &expression) 
-{
-    return out << expression.token_literal();
-}
+//string
+//Expression::token_literal() const
+//{
+//    return token.literal;
+//}
+//
+//string
+//Expression::to_string() const
+//{
+//    return token_literal();
+//}
+//
+//std::ostream &
+//operator<<(std::ostream &out, const Expression &expression) 
+//{
+//    return out << expression.token_literal();
+//}
 
 string 
 Identifier::token_literal() const
@@ -55,7 +55,11 @@ PrefixExpression::token_literal() const
 string
 PrefixExpression::to_string() const
 {
-    return string{ std::format("({}{})", optr, right.to_string()) };
+    return string{ std::format(
+        "({}{})",
+        optr,
+        ExpressionToString(right)
+    ) };
 }
 
 string 
@@ -67,23 +71,56 @@ InfixExpression::token_literal() const
 string
 InfixExpression::to_string() const
 {
-    return string{ std::format("({}{}{})", left.to_string(), optr, right.to_string()) };
+    return string{ std::format(
+        "({}{}{})", 
+        ExpressionToString(left),
+        optr, 
+        ExpressionToString(right)
+    ) };
+}
+
+// NOTE(yemon): Should this return a string_view instead of a new string instance?
+string
+ExpressionToString(const Expression &expression)
+{
+    switch (expression.type) {
+    case ExpressionType::IDENT: {
+        if (const Identifier *ident = std::get_if<Identifier>(&expression.variant)) {
+            return ident->to_string();
+        }
+        return "";
+    } break;
+
+    case ExpressionType::INT_LIT: {
+        if (const IntegerLiteral *int_lit = std::get_if<IntegerLiteral>(&expression.variant)) {
+            return int_lit->to_string();
+        }
+        return "";
+    } break;
+
+    case ExpressionType::PREFIX: {
+        if (const PrefixExpression *prefix_expr = std::get_if<PrefixExpression>(&expression.variant)) {
+            return prefix_expr->to_string();
+        }
+        return "";
+    } break;
+
+    case ExpressionType::INFIX: {
+        if (const InfixExpression *infix_expr = std::get_if<InfixExpression>(&expression.variant)) {
+            return infix_expr->to_string();
+        }
+        return "";
+    } break;
+
+    default:
+        // TODO(yemon): Error handling and reporting
+        break;
+    }
 }
 
 //------------------------------------------------------------------------------
 
-string 
-Statement::token_literal() const
-{
-    return string{ "Statement base: " };
-}
-
-string Statement::to_string() const
-{
-    return token_literal();
-}
-
-string 
+string
 LetStatement::token_literal() const
 {
     return token.literal;
@@ -100,10 +137,7 @@ LetStatement::to_string() const
     buffer += token_literal();
     buffer += name.value;
     buffer += " = ";
-
-    if (value) {
-        buffer += (*value).to_string();
-    }
+    buffer += ExpressionToString(value);
     buffer += ";";
 
     return buffer;
@@ -121,11 +155,7 @@ ReturnStatement::to_string() const
     string buffer{};
 
     buffer += token_literal() + " ";
-
-    if (value) {
-        buffer += (*value).token_literal();
-    }
-
+    buffer += ExpressionToString(value);
     buffer += ";";
 
     return buffer;
@@ -140,9 +170,37 @@ ExpressionStatement::token_literal() const
 string 
 ExpressionStatement::to_string() const
 {
-    if (expression) {
-        return (*expression).to_string();
+    return ExpressionToString(expression);
+}
+
+string
+StatementToString(const Statement &statement)
+{
+    switch (statement.type) {
+    case StatementType::LET: {
+        if (const LetStatement *let_statement = std::get_if<LetStatement>(&statement.variant)) {
+            return let_statement->to_string();
+        }
+        return "";
+    } break;
+        
+    case StatementType::RETURN: {
+        if (const ReturnStatement *return_statement = std::get_if<ReturnStatement>(&statement.variant)) {
+            return return_statement->to_string();
+        }
+        return "";
+    } break;
+
+    case StatementType::EXPRESSION: {
+        if (const ExpressionStatement *expr_statement = std::get_if<ExpressionStatement>(&statement.variant)) {
+            return expr_statement->to_string();
+        }
+        return "";
+    } break;
+
+    default:
+        // TODO(yemon): Error handlings and reporting
+        break;
     }
-    return "";
 }
 
