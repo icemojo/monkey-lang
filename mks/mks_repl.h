@@ -6,7 +6,7 @@
 
 using std::string;
 using std::string_view;
-using std::unique_ptr, std::move;
+using std::unique_ptr;
 
 
 static const string_view PROMPT = ">> ";

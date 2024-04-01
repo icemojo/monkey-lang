@@ -62,7 +62,7 @@ ReplStart(const Options &options)
         }
 
         lexer = LexerNew(input_buffer);
-        parser = ParserNew(move(lexer));
+        parser = ParserNew(std::move(lexer));
 
         if (options.verbose) {
             unique_ptr<Lexer> debug_lexer = LexerNew(input_buffer);

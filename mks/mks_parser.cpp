@@ -39,7 +39,7 @@ unique_ptr<Parser>
 ParserNew(unique_ptr<Lexer> lexer)
 {
     auto parser = make_unique<Parser>();
-    parser->lexer = move(lexer);
+    parser->lexer = std::move(lexer);
 
     // Read two tokens, so that current token and peek tokens are set
     parser->next_token();
@@ -105,8 +105,6 @@ ParseProgram(Parser *parser)
         if (StatementResult result = ParseStatement(it.parser);
             result.success) {
             program->statements.push_back(result.statement);
-            //program->statements.push_back(*result.statement_ptr);
-            //delete result.statement_ptr;
         }
 
         it.next();
@@ -118,46 +116,21 @@ ParseProgram(Parser *parser)
 StatementResult //<Statement>
 ParseStatement(Parser *parser)
 {
-    //StatementResult<Statement> result = {
-    //    .success = false,
-    //    .statement_ptr = nullptr,
-    //};
-    //if (parser == nullptr) {
-    //    return result;
-    //}
-
-    //StatementResult result{};
-
     switch (parser->cur_token.type) {
     case TokenType::LET:
-        //if (StatementResult<LetStatement> parse_result = ParseLetStatement(parser);
-        //    parse_result.success) {
-        //    result.success = true;
-        //    result.statement_ptr = parse_result.statement_ptr;
-        //    return result;
-        //}
         return ParseLetStatement(parser);
 
     case TokenType::RETURN:
-        //if (StatementResult<ReturnStatement> parse_result = ParseReturnStatement(parser);
-        //    parse_result.success) {
-        //    result.success = true;
-        //    result.statement_ptr = parse_result.statement_ptr;
-        //    return result;
-        //}
         return ParseReturnStatement(parser);
 
     default:
-        //if (StatementResult<ExpressionStatement> parse_result = ParseExpressionStatement(parser);
-        //    parse_result.success) {
-        //    result.success = true;
-        //    result.statement_ptr = parse_result.statement_ptr;
-        //    return result;
-        //}
         StatementResult result{};
         ExpressionStatement expr_statement = ParseExpressionStatement(parser);
 
-        result.statement = Statement(StatementType::EXPRESSION, expr_statement);
+        //result.statement = Statement(StatementType::EXPRESSION, expr_statement);
+        result.statement = Statement(StatementType::EXPRESSION);
+        result.statement.variant = make_unique<void *>(expr_statement);
+
         result.success = true;
         return result;
     }
@@ -168,14 +141,6 @@ ParseStatement(Parser *parser)
 StatementResult //<LetStatement>
 ParseLetStatement(Parser *parser)
 {
-    //StatementResult<LetStatement> result = {
-    //    .success = false,
-    //    .statement_ptr = nullptr,
-    //};
-    //if (parser == nullptr) {
-    //    return result;
-    //}
-
     StatementResult result{};
 
     if (!parser->expect_peek(TokenType::IDENT)) {
@@ -194,19 +159,13 @@ ParseLetStatement(Parser *parser)
     LetStatement let_statement{ identifier };
 
     ExpressionStatement expr_statement = ParseExpression(parser, Prec::LOWEST);
-    let_statement.value = expr_statement.expression;
+    //let_statement.value = expr_statement.expression;
+    let_statement.value = std::move(expr_statement.expression);
 
-    //if (StatementResult<ExpressionStatement> statement_result = ParseExpressionStatement(parser);
-    //    statement_result.success) {
-    //    ExpressionStatement statement = statement_result.statement;
+    //result.statement = Statement(StatementType::LET, let_statement);
+    result.statement = Statement(StatementType::LET);
+    result.statement.variant = make_unique<void *>(let_statement);
 
-    //    result.statement.value = Expression{
-    //        .type = statement_result.statement.token.type,  // ???
-    //    };
-    //    result.statement.value = statement_result.statement.expression;
-    //}
-
-    result.statement = Statement(StatementType::LET, let_statement);
     result.success = true;
     return result;
 }
@@ -214,14 +173,6 @@ ParseLetStatement(Parser *parser)
 StatementResult //<ReturnStatement>
 ParseReturnStatement(Parser *parser)
 {
-    //StatementResult<ReturnStatement> result = {
-    //    .success = false,
-    //    .statement_ptr = nullptr,
-    //};
-    //if (parser == nullptr) {
-    //    return result;
-    //}
-
     StatementResult result{};
 
     parser->next_token();       // TODO(yemon): What was I skipping here exactly?
@@ -229,14 +180,18 @@ ParseReturnStatement(Parser *parser)
     ReturnStatement return_statement{};
 
     ExpressionStatement expr_statement = ParseExpression(parser, Prec::LOWEST);
-    return_statement.value = expr_statement.expression;
+    //return_statement.value = expr_statement.expression;
+    return_statement.value = std::move(expr_statement.expression);
 
     // NOTE(yemon): Do I still need this?
     while (!parser->is_cur_token(TokenType::SEMICOLON)) {
         parser->next_token();
     }
 
-    result.statement = Statement(StatementType::RETURN, return_statement);
+    //result.statement = Statement(StatementType::RETURN, return_statement);
+    result.statement = Statement(StatementType::RETURN);
+    result.statement.variant = make_unique<void *>(return_statement);
+
     result.success = true;
     return result;
 }
@@ -264,8 +219,6 @@ ParseExpressionStatement(Parser *parser)
     return expr_statement;
 }
 
-// TODO(yemon): Could this be simplified better (and possibly combined with) 
-// in relation to the `ParseExpressionStatement(..)` above?
 ExpressionStatement
 ParseExpression(Parser *parser, const Prec prec)
 {
@@ -283,29 +236,35 @@ ParseExpression(Parser *parser, const Prec prec)
     case TokenType::IDENT: {
         Identifier identifier = ParseIdentifier(parser);
         left_expr_statement.token = identifier.token;
-        left_expr_statement.expression = Expression(
-            ExpressionType::IDENT,
-            identifier
-        );
+        //left_expr_statement.expression = Expression(
+        //    ExpressionType::IDENT,
+        //    identifier
+        //);
+        left_expr_statement.expression = Expression(ExpressionType::IDENT);
+        left_expr_statement.expression.variant = make_unique<void *>(identifier);
     } break;
     
     case TokenType::INT: {
         IntegerLiteral int_literal = ParseIntegerLiteral(parser);
         left_expr_statement.token = int_literal.token;
-        left_expr_statement.expression = Expression(
-            ExpressionType::INT_LIT, 
-            int_literal
-        );
+        //left_expr_statement.expression = Expression(
+        //    ExpressionType::INT_LIT, 
+        //    int_literal
+        //);
+        left_expr_statement.expression = Expression(ExpressionType::INT_LIT);
+        left_expr_statement.expression.variant = make_unique<void *>(int_literal);
     } break;
 
     case TokenType::BANG:
     case TokenType::MINUS: {
         PrefixExpression prefix_expr = ParsePrefixExpression(parser);
         left_expr_statement.token = prefix_expr.token;
-        left_expr_statement.expression = Expression(
-            ExpressionType::PREFIX,
-            prefix_expr
-        );
+        //left_expr_statement.expression = Expression(
+        //    ExpressionType::PREFIX,
+        //    prefix_expr
+        //);
+        left_expr_statement.expression = Expression(ExpressionType::PREFIX);
+        left_expr_statement.expression.variant = make_unique<void *>(prefix_expr);
     } break;
 
     default:
@@ -338,10 +297,13 @@ ParseExpression(Parser *parser, const Prec prec)
             InfixExpression infix_expr = ParseInfixExpression(
                 parser, left_expr_statement.expression);
             right_exp_statement.token = infix_expr.token;
-            right_exp_statement.expression = Expression(
-                ExpressionType::INFIX,
-                infix_expr
-            );
+            //right_exp_statement.expression = Expression(
+            //    ExpressionType::INFIX,
+            //    infix_expr
+            //);
+            right_exp_statement.expression = Expression(ExpressionType::INFIX);
+            right_exp_statement.expression.variant = make_unique<void *>(infix_expr);
+
             //right_exp_statement.expression = infix_expr;
             //left_exp_statement = right_exp_statement;       // ?
         } break;
@@ -393,7 +355,11 @@ ParsePrefixExpression(Parser *parser)
 
     ExpressionStatement expr_statement = ParseExpression(parser, Prec::PREFIX);
     //prefix_expression.right = *(expr_statement.expression);
-    prefix_expr.right = expr_statement.expression;
+    //prefix_expr.right = expr_statement.expression;
+    prefix_expr.right = Expression(expr_statement.expression.type);
+    prefix_expr.right.variant = make_unique<void *>(
+        expr_statement.expression.variant
+    );
 
     return prefix_expr;
 }
@@ -411,7 +377,11 @@ ParseInfixExpression(Parser *parser, const Expression &left)
     
     ExpressionStatement right_expr_statement = ParseExpression(parser, prec);
     //infix_expression.right = *(right_exp_statement.expression);
-    infix_expr.right = right_expr_statement.expression;
+    //infix_expr.right = right_expr_statement.expression;
+    infix_expr.right = Expression(right_expr_statement.expression.type);
+    infix_expr.right.variant = make_unique<void *>(
+        right_expr_statement.expression.variant
+    );
 
     return infix_expr;
 }

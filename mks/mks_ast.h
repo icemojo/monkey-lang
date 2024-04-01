@@ -6,11 +6,13 @@
 #include <concepts>
 //#include <optional>
 #include <variant>
+#include <memory>
 #include <cassert>
 #include "mks_lexer.h"
 
 using std::string;
 using std::vector;
+using std::unique_ptr, std::make_unique;
 //using std::optional, std::make_optional;
 //using std::variant, std::get_if;
 
@@ -26,12 +28,107 @@ using std::vector;
 //std::ostream &
 //operator<<(std::ostream &out, const Expression1 &expression);
 
+enum class ExpressionType {
+    INVALID = 0,
+    IDENT,
+    INT_LIT,
+    PREFIX,
+    INFIX,
+};
+
+//using ExpressionVariant = std::variant<Identifier, 
+//                                       IntegerLiteral, 
+//                                       PrefixExpression, 
+//                                       InfixExpression>;
+
+// NOTE(yemon): Move semantics have to be properly applied for 
+// all possible `Expression.variant`, since they'll be handled 
+// by a `unique_ptr<void *>`
+
+struct Expression {
+    ExpressionType type;
+    //ExpressionVariant variant;
+    unique_ptr<void *> variant;
+
+    Expression() {
+        type = ExpressionType::INVALID;
+        variant = nullptr;
+    }
+
+    Expression(ExpressionType type) : type(type) {
+        variant = nullptr;
+    }
+
+    Expression(const Expression &other) {
+        type = other.type;
+        variant = make_unique<void *>(*(other.variant));
+    }
+    Expression &operator=(const Expression &other) {
+        type = other.type;
+        variant = make_unique<void *>(*(other.variant));
+    }
+
+    Expression(Expression &&other) noexcept {
+        type = other.type;
+        variant = std::move(other.variant);
+    }
+    Expression &operator=(Expression &&other) noexcept {
+        type = other.type;
+        variant = std::move(other.variant);
+    }
+
+    ~Expression() {
+        if (variant != nullptr) {
+            variant.release();
+        }
+        assert(variant == nullptr);
+    }
+
+    //Expression(ExpressionType type, ExpressionVariant variant) : 
+    //    type(type), 
+    //    variant(variant) 
+    //{}
+
+    //Expression(Identifier identifier) {
+    //    type = ExpressionType::IDENT;
+    //    variant.emplace<Identifier>(identifier);
+    //}
+
+    //template <typename V>
+    //Expression(ExpressionType type, V v) : type(type) {
+    //    assert(std::holds_alternative<V>(v));
+    //    variant.emplace<V>(v);
+    //}
+
+    //template <typename V>
+    //Expression(const Expression &other) {
+    //    type = other.type;
+    //    assert(std::holds_alternative<V>(other.variant));
+    //    variant.emplace<V>(other.variant);
+    //}
+
+    //template <typename V>
+    //Expression &operator=(const Expression &other) {
+    //    type = other.type;
+    //    assert(std::holds_alternative<V>(other.variant));
+    //    variant.emplace<V>(other.variant);
+    //}
+};
+
+string ExpressionToString(const Expression &expression);
+
 struct Identifier { // : Expression {
     Token token;
     string value;
 
-    Identifier() {}
-    ~Identifier() {}
+    //Identifier() {}
+    //~Identifier() {}
+
+    //Identifier(const Identifier &rhs) = default;
+    //Identifier &operator=(const Identifier &rhs) = default;
+
+    //Identifier(const Identifier &&rhs) = default;
+    //Identifier &operator=(const Identifier &&rhs) = default;
 
     string token_literal() const;
 
@@ -48,8 +145,14 @@ struct IntegerLiteral { // : Expression {
     Token token;
     int64_t value;
 
-    IntegerLiteral() {}
-    ~IntegerLiteral() {}
+    //IntegerLiteral() {}
+    //~IntegerLiteral() {}
+
+    //IntegerLiteral(const IntegerLiteral &rhs) = default;
+    //IntegerLiteral &operator=(const IntegerLiteral &rhs) = default;
+
+    //IntegerLiteral(const IntegerLiteral &&rhs) = default;
+    //IntegerLiteral &operator=(const IntegerLiteral &&rhs) = default;
 
     string token_literal() const;
 
@@ -67,8 +170,14 @@ struct PrefixExpression { // : Expression {
     string optr;        // operator; like !, -, etc.
     Expression right;
 
-    PrefixExpression() {}
-    ~PrefixExpression() {}
+    //PrefixExpression() {}
+    //~PrefixExpression() {}
+
+    //PrefixExpression(const PrefixExpression &other) = default;
+    //PrefixExpression &operator=(const PrefixExpression &other) = default;
+
+    //PrefixExpression(const PrefixExpression &&other) = default;
+    //PrefixExpression &operator=(const PrefixExpression &&other) = default;
 
     string token_literal() const;
 
@@ -82,70 +191,19 @@ struct InfixExpression { // : Expression {
     string optr;        // operator; +, <, >=, ==, !=, etc.
     Expression right;
 
-    InfixExpression() {}
-    ~InfixExpression() {}
+    //InfixExpression() {}
+    //~InfixExpression() {}
+
+    //InfixExpression(const InfixExpression &other) = default;
+    //InfixExpression &operator=(const InfixExpression &other) = default;
+
+    //InfixExpression(const InfixExpression &&other) = default;
+    //InfixExpression &operator=(const InfixExpression &&other) = default;
 
     string token_literal() const;
 
     string to_string() const;
 };
-
-
-enum class ExpressionType {
-    INVALID = 0,
-    IDENT,
-    INT_LIT,
-    PREFIX,
-    INFIX,
-};
-
-using ExpressionVariant = std::variant<Identifier, 
-                                       IntegerLiteral, 
-                                       PrefixExpression, 
-                                       InfixExpression>;
-
-struct Expression {
-    ExpressionType type;
-    ExpressionVariant variant;
-
-    Expression() {
-        type = ExpressionType::INVALID;
-    }
-
-    //Expression(ExpressionType type, ExpressionVariant variant) : 
-    //    type(type), 
-    //    variant(variant) 
-    //{}
-
-    //Expression(Identifier identifier) {
-    //    type = ExpressionType::IDENT;
-    //    variant.emplace<Identifier>(identifier);
-    //}
-
-    template <typename V>
-    Expression(ExpressionType type, V v) : type(type) {
-        assert(std::holds_alternative<V>(v));
-        variant.emplace<V>(v);
-    }
-
-    template <typename V>
-    Expression(const Expression &other) {
-        type = other.type;
-        assert(std::holds_alternative<V>(other.variant));
-        variant.emplace<V>(other.variant);
-    }
-
-    template <typename V>
-    Expression &operator=(const Expression &other) {
-        type = other.type;
-        assert(std::holds_alternative<V>(other.variant));
-        variant.emplace<V>(other.variant);
-    }
-
-    ~Expression() {}
-};
-
-string ExpressionToString(const Expression &expression);
 
 //------------------------------------------------------------------------------
 
@@ -161,10 +219,18 @@ struct LetStatement {
     LetStatement(Identifier identifier) {
         token = TokenNew(TokenType::LET, "let");
         name = identifier;
+
         //value = {};
+        value = Expression(ExpressionType::INVALID);
     }
 
-    ~LetStatement() = default;
+    //~LetStatement() = default;
+
+    //LetStatement(const LetStatement &rhs) = default;
+    //LetStatement &operator=(const LetStatement &rhs) = default;
+
+    //LetStatement(const LetStatement &&rhs) = default;
+    //LetStatement &operator=(const LetStatement &&rhs) = default;
 
     string token_literal() const;
 
@@ -179,10 +245,18 @@ struct ReturnStatement {
 
     ReturnStatement() {
         token = TokenNew(TokenType::RETURN, "return");
+
         //value = {};
+        value = Expression(ExpressionType::INVALID);
     }
 
-    ~ReturnStatement() = default;
+    //~ReturnStatement() = default;
+
+    //ReturnStatement(const ReturnStatement &rhs) = default;
+    //ReturnStatement &operator=(const ReturnStatement &rhs) = default;
+
+    //ReturnStatement(const ReturnStatement &&rhs) = default;
+    //ReturnStatement &operator=(const ReturnStatement &&rhs) = default;
 
     string token_literal() const;
 
@@ -203,8 +277,14 @@ struct ExpressionStatement {
     //optional<Expression> expression;
     Expression expression;
 
-    ExpressionStatement() = default;
-    ~ExpressionStatement() = default;
+    //ExpressionStatement() = default;
+    //~ExpressionStatement() = default;
+
+    //ExpressionStatement(const ExpressionStatement &rhs) = default;
+    //ExpressionStatement &operator=(const ExpressionStatement &rhs) = default;
+
+    //ExpressionStatement(const ExpressionStatement &&rhs) = default;
+    //ExpressionStatement &operator=(const ExpressionStatement &&rhs) = default;
 
     string token_literal() const;
 
@@ -218,31 +298,53 @@ enum class StatementType {
     EXPRESSION
 };
 
-using StatementVariant = std::variant<LetStatement, 
-                                      ReturnStatement,
-                                      ExpressionStatement>;
+//using StatementVariant = std::variant<LetStatement, 
+//                                      ReturnStatement,
+//                                      ExpressionStatement>;
+
+// NOTE(yemon): Move semantics have to be properly applied for 
+// all possible `Statement.variant`, since they'll be handled 
+// by a `unique_ptr<void *>`
 
 struct Statement {
     StatementType type;
-    StatementVariant variant;
+    //StatementVariant variant;
+    unique_ptr<void *> variant;
 
     Statement() {
         type = StatementType::INVALID;
         //variant = {};
+        variant = nullptr;
     }
 
-    //Statement(StatementType type, StatementVariant variant) : 
-    //    type(type), 
-    //    variant(variant) 
-    //{}
-
-    template <typename V>
-    Statement(StatementType type, V v) : type(type) {
-        assert(std::holds_alternative<V>(v));
-        variant.emplace<V>(v);
+    Statement(StatementType type) : type(type) {
+        variant = nullptr;
     }
 
-    ~Statement() = default;
+    Statement(const Statement &other) {
+        type = other.type;
+        variant = make_unique<void *>(*(other.variant));
+    }
+    Statement &operator=(const Statement &other) {
+        type = other.type;
+        variant = make_unique<void *>(*(other.variant));
+    }
+
+    Statement(Statement &&other) noexcept {
+        type = other.type;
+        variant = std::move(other.variant);
+    }
+    Statement &operator=(Statement &&other) noexcept {
+        type = other.type;
+        variant = std::move(other.variant);
+    }
+
+    ~Statement() {
+        if (variant != nullptr) {
+            variant.release();
+        }
+        assert(variant == nullptr);
+    }
 };
 
 string StatementToString(const Statement &statement);
