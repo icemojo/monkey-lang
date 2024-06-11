@@ -149,7 +149,7 @@ lexer_next_token :: proc(using lexer: ^Lexer) -> Token
                 lexer_read_char(lexer)
             }
             else {
-                return token_new(.ASSIGN, ch)
+                token = token_new(.ASSIGN, ch)
             }
         }
         case '!': {
@@ -158,21 +158,21 @@ lexer_next_token :: proc(using lexer: ^Lexer) -> Token
                 lexer_read_char(lexer)
             }
             else {
-                return token_new(.BANG, ch)
+                token = token_new(.BANG, ch)
             }
         }
 
         case '+': {
-            return token_new(.PLUS, ch)
+            token = token_new(.PLUS, ch)
         }
         case '-': {
-            return token_new(.MINUS, ch)
+            token = token_new(.MINUS, ch)
         }
         case '*': {
-            return token_new(.ASTRISK, ch)
+            token = token_new(.ASTRISK, ch)
         }
         case '/': {
-            return token_new(.SLASH, ch)
+            token = token_new(.SLASH, ch)
         }
 
         case '<': {
@@ -181,7 +181,7 @@ lexer_next_token :: proc(using lexer: ^Lexer) -> Token
                 lexer_read_char(lexer)
             }
             else {
-                return token_new(.LT, ch)
+                token = token_new(.LT, ch)
             }
         }
         case '>': {
@@ -190,30 +190,30 @@ lexer_next_token :: proc(using lexer: ^Lexer) -> Token
                 lexer_read_char(lexer)
             }
             else {
-                return token_new(.GT, ch)
+                token = token_new(.GT, ch)
             }
         }
         case ';': {
-            return token_new(.SEMICOLON, ch)
+            token = token_new(.SEMICOLON, ch)
         }
         case ',': {
-            return token_new(.COMMA, ch)
+            token = token_new(.COMMA, ch)
         }
         case '(': {
-            return token_new(.LPAREN, ch)
+            token = token_new(.LPAREN, ch)
         }
         case ')': {
-            return token_new(.RPAREN, ch)
+            token = token_new(.RPAREN, ch)
         }
         case '{': {
-            return token_new(.LBRACE, ch)
+            token = token_new(.LBRACE, ch)
         }
         case '}': {
-            return token_new(.RBRACE, ch)
+            token = token_new(.RBRACE, ch)
         }
 
         case 0: {   // '\0'
-            return token_new(.EOF, 0)
+            token = token_new(.EOF, 0)
         }
 
         case: {
@@ -247,13 +247,6 @@ lexer_read_identifier :: proc(using lexer: ^Lexer) -> string
             continue
         }
         else {
-            //identifier, err := strings.clone_from_bytes(input[start_pos:i])
-            //if !err {
-            //    return identifier
-            //}
-            //else {
-            //    return ""
-            //}
             identifier := input[start_pos:i]
             return identifier
         }
@@ -276,6 +269,15 @@ lexer_read_number :: proc(using lexer: ^Lexer) -> string
 
     number := input[start_pos:end_pos]
     return number
+}
+
+lexer_print_tokens :: proc(using lexer: ^Lexer) 
+{
+    fmt.println("Lexer tokens: {")
+    for token := lexer_next_token(lexer); token.type != .EOF; token = lexer_next_token(lexer) {
+        fmt.printf("    %v\n", token)
+    }
+    fmt.println("}")
 }
 
 //------------------------------------------------------------------------------

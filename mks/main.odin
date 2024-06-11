@@ -5,7 +5,7 @@ import "core:fmt"
 
 main :: proc() 
 {
-    lexer := lexer_new("let x = 12;")
-    fmt.println(lexer)
+    options := parse_args()
+    repl_start(&options)
 }
 
