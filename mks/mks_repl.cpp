@@ -1,8 +1,10 @@
 #include <iostream>
 #include <vector>
 #include <ranges>
-#include "mks_lexer.h"
 #include "mks_repl.h"
+#include "mks_lexer.h"
+#include "mks_ast.h"
+#include "mks_parser.h"
 
 
 Options 
@@ -13,7 +15,7 @@ ParseOptions(int argc, char **argv)
         return options;
     }
 
-    auto to_string = [](const char *v) { return std::string(v); };
+    auto to_string = [](const char *v) { return string(v); };
     auto args = std::span(argv, argc) | std::views::transform(to_string);
 
     for (auto it = args.begin() + 1; it != args.end(); it += 1) {
@@ -34,11 +36,18 @@ ParseOptions(int argc, char **argv)
 void 
 ReplStart(const Options &options)
 {
-    std::cout << "Well, hello there! They say enough monkeys with typewriters can finish a novel." << std::endl;
-    std::cout << "So, why don't you start your shenanigans?" << std::endl;
+    std::cout << "Well, hello there! They say enough monkeys with typewriters can finish a novel.\n";
+    std::cout << "So, why don't you start your shenanigans?\n";
+
+    if (options.verbose) {
+        std::cout << "(Verbose mode turned on.)\n";
+    }
 
     bool should_quit = false;
     std::string input_buffer{};
+
+    unique_ptr<Lexer> lexer;
+    unique_ptr<Parser> parser;
 
     while (!should_quit) {
         std::cout << PROMPT;
@@ -52,11 +61,19 @@ ReplStart(const Options &options)
             continue;
         }
 
-        std::unique_ptr<Lexer> lexer = LexerNew(input_buffer);
-        input_buffer.clear();
+        lexer = LexerNew(input_buffer);
+        parser = ParserNew(std::move(lexer));
 
         if (options.verbose) {
-            lexer->print_tokens();
+            unique_ptr<Lexer> debug_lexer = LexerNew(input_buffer);
+            debug_lexer->print_tokens();
         }
+
+        Program *program = ParseProgram(&(*parser));
+        if (options.verbose) {
+            std::cout << program->to_string() << std::endl;
+        }
+
+        input_buffer.clear();
     }
 }

@@ -3,18 +3,14 @@
 
 #include <string>
 #include <vector>
-#include <memory>
 #include <unordered_map>
+#include <memory>
 
-using byte   = char;
-using ubyte  = unsigned char;
-using ushort = unsigned short;
-using i16    = short;
-using i32    = int;
-using u16    = unsigned short;
-using u32    = unsigned int;
-using i64    = long long;
-using u64    = unsigned long long;
+using std::string;
+using std::string_view;
+using std::vector;
+using std::unordered_map;
+using std::unique_ptr, std::make_unique;
 
 
 enum class TokenType {
@@ -57,7 +53,7 @@ enum class TokenType {
     FALSE,      // false
 };
 
-constexpr std::string
+constexpr string
 TokenTypeToString(TokenType type);
 
 std::ostream &
@@ -65,7 +61,7 @@ operator<<(std::ostream &out, const TokenType token_type);
 
 //------------------------------------------------------------------------------
 
-static const std::unordered_map<std::string_view, TokenType> 
+inline const unordered_map<string_view, TokenType> 
 KEYWORDS = {
     {"let", TokenType::LET},
     {"fn", TokenType::FUNCTION},
@@ -78,37 +74,39 @@ KEYWORDS = {
 
 struct Token {
     TokenType type = TokenType::ILLEGAL;
-    std::string literal{};
+    string literal{};
 
     void print() const;
 };
 
 Token
-TokenNew(TokenType type, byte ch);
+TokenNew(TokenType type, char ch);
 
 Token
-TokenNew(TokenType type, const std::string &literal);
+TokenNew(TokenType type, const string &literal);
 
 TokenType
-CheckKeywordOrIdentifier(const std::string_view &identifier);
+CheckKeywordOrIdentifier(const string_view &identifier);
 
 //------------------------------------------------------------------------------
 
 struct Lexer {
-    std::string input{};
-    i32 position = 0;       // current position in the input
-    i32 read_position = 0;  // current reading position, 1 char ahead of the current one
-    byte ch = '\0';
+    string input{};
+    int32_t position = 0;       // current position in the input
+    int32_t read_position = 0;  // current reading position, 1 char ahead of the current one
+    char ch = '\0';
+
+    Lexer(const string &input) : input(input) {}
 
     void read_char();
 
-    byte peek_char() const;
+    char peek_char() const;
 
     Token next_token();
 
-    std::string read_identifier();
+    string read_identifier();
 
-    std::string read_number();
+    string read_number();
 
     void skip_whitespaces();
 
@@ -117,12 +115,12 @@ struct Lexer {
     void print_tokens();
 };
 
-std::unique_ptr<Lexer>
-LexerNew(const std::string &input);
+unique_ptr<Lexer>
+LexerNew(const string &input);
 
 //------------------------------------------------------------------------------
 
 bool
-ValidIdentifierLetter(const byte c);
+ValidIdentifierLetter(const char c);
 
 #endif // MKS_LEXER_H_

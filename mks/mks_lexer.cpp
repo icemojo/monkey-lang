@@ -3,7 +3,7 @@
 #include "mks_lexer.h"
 
 
-constexpr std::string
+constexpr string
 TokenTypeToString(TokenType type)
 {
     switch (type) {
@@ -90,29 +90,29 @@ Token::print() const
 }
 
 Token
-TokenNew(TokenType type, byte ch) 
+TokenNew(TokenType type, char ch) 
 {
     return Token{ type, { ch } };
 }
 
 Token
-TokenNew(TokenType type, const std::string &literal) 
+TokenNew(TokenType type, const string &literal) 
 {
     return Token{ type, literal };
 }
 
 TokenType
-CheckKeywordOrIdentifier(const std::string_view &identifier)
+CheckKeywordOrIdentifier(const string_view &identifier)
 {
     if (KEYWORDS.size() == 0) {
-        return TokenType::IDENT;
+        return TokenType::ILLEGAL;
     }
 
     if (const auto search_it = KEYWORDS.find(identifier); search_it != KEYWORDS.end()) {
         return search_it->second;
     }
 
-    return TokenType::IDENT;
+    return TokenType::ILLEGAL;
 }
 
 //------------------------------------------------------------------------------
@@ -131,7 +131,7 @@ Lexer::read_char()
     read_position += 1;
 }
 
-byte 
+char 
 Lexer::peek_char() const
 {
     if (read_position >= input.size()) {
@@ -150,7 +150,7 @@ Lexer::next_token()
 
     switch (ch) {
     case '=':
-        if (const byte nch = peek_char(); nch == '=') {
+        if (const char nch = peek_char(); nch == '=') {
             token = TokenNew(TokenType::EQ, { ch, nch });
             read_char();
         }
@@ -159,7 +159,7 @@ Lexer::next_token()
         }
         break;
     case '!':
-        if (const byte nch = peek_char(); nch == '=') {
+        if (const char nch = peek_char(); nch == '=') {
             token = TokenNew(TokenType::NOT_EQ, { ch, nch });
             read_char();
         }
@@ -180,7 +180,7 @@ Lexer::next_token()
         token = TokenNew(TokenType::SLASH, ch);
         break;
     case '<':
-        if (const byte nch = peek_char(); nch == '=') {
+        if (const char nch = peek_char(); nch == '=') {
             token = TokenNew(TokenType::LT_EQ, { ch, nch });
             read_char();
         }
@@ -189,7 +189,7 @@ Lexer::next_token()
         }
         break;
     case '>':
-        if (const byte nch = peek_char(); nch == '=') {
+        if (const char nch = peek_char(); nch == '=') {
             token = TokenNew(TokenType::GT_EQ, { ch, nch });
             read_char();
         }
@@ -243,10 +243,10 @@ Lexer::next_token()
     return token;
 }
 
-std::string
+string
 Lexer::read_identifier()
 {
-    std::string identifier{};
+    string identifier{};
 
     const auto start_it = input.begin() + position;
     for (auto it = input.begin() + position; it != input.end(); it += 1) {
@@ -262,10 +262,10 @@ Lexer::read_identifier()
     return "";
 }
 
-std::string
+string
 Lexer::read_number()
 {
-    std::string identifier{};
+    string identifier{};
 
     for (auto it = input.begin() + position; it != input.end(); it += 1) {
         if (std::isdigit(*it) != 0) {
@@ -311,10 +311,10 @@ Lexer::print_tokens()
     std::cout << '}' << std::endl;
 }
 
-std::unique_ptr<Lexer>
-LexerNew(const std::string &input)
+unique_ptr<Lexer>
+LexerNew(const string &input)
 {
-    auto lexer = std::make_unique<Lexer>(input);
+    auto lexer = make_unique<Lexer>(input);
     lexer->read_char();
     return lexer;
 }
@@ -322,7 +322,7 @@ LexerNew(const std::string &input)
 //------------------------------------------------------------------------------
 
 bool 
-ValidIdentifierLetter(const byte c)
+ValidIdentifierLetter(const char c)
 {
     // A-Z, a-z, _
     return (c >= 65 && c <= 90) || (c >= 97 && c <= 122) || c == 95;
