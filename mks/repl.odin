@@ -13,8 +13,7 @@ Options :: struct {
 parse_args :: proc() -> Options
 {
     options := Options{ false, false, false }
-    i := 1
-    for i < len(os.args) {
+    for i := 1; i < len(os.args); {
         arg: string = os.args[i]
         if arg == "-t" || arg == "--tokenize" { 
             options.tokenize_only = true
@@ -32,7 +31,7 @@ parse_args :: proc() -> Options
 
 repl_start :: proc(options: ^Options)
 {
-    fmt.println("Well, hello there! They say enough monkeys with typewriters can finish novel.")
+    fmt.println("Well, hello there! They say enough monkeys with typewriters can finish a novel.")
     fmt.println("So, why don't you start your shenanigans?")
 
     if options.verbose {
@@ -51,6 +50,7 @@ repl_start :: proc(options: ^Options)
         if err != 0 {
             // TODO(yemon): Handle read error from stdin
             fmt.println("ERR: Unable to read input.")
+            should_quit = true
             return
         }
 
