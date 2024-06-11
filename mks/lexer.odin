@@ -13,26 +13,26 @@ Token_Type :: enum {
     INT,
 
     // Operators
-    ASSIGN,
-    BANG,
-    PLUS,
-    MINUS,
-    ASTRISK,
-    SLASH,
-    LT,
-    GT,
-    LT_EQ,
-    GT_EQ,
-    EQ,
-    NOT_EQ,
+    ASSIGN,     // =
+    BANG,       // !
+    PLUS,       // +
+    MINUS,      // -
+    ASTRISK,    // *
+    SLASH,      // /
+    LT,         // <
+    GT,         // >
+    LT_EQ,      // <=
+    GT_EQ,      // >=
+    EQ,         // ==
+    NOT_EQ,     // !=
 
     // Delimiters
-    COMMA,
-    SEMICOLON,
-    LPAREN,
-    RPAREN,
-    LBRACE,
-    RBRACE,
+    COMMA,      // ,
+    SEMICOLON,  // ;
+    LPAREN,     // (
+    RPAREN,     // )
+    LBRACE,     // {
+    RBRACE,     // }
 
     // Keywords
     LET,
@@ -70,13 +70,26 @@ Token :: struct {
     literal :string,
 }
 
-token_new :: proc(token_type: Token_Type, ch: u8) -> Token
+token_new_char :: proc(token_type: Token_Type, char: u8) -> Token
 {
-    ch := ch
+    char := char
     return Token{
         type = token_type,
-        literal = strings.clone_from_ptr(&ch, 1),
+        literal = strings.clone_from_ptr(&char, 1),
     }
+}
+
+token_new_str :: proc(token_type: Token_Type, str: string) -> Token
+{
+    return Token{
+        type = token_type,
+        literal = str,
+    }
+}
+
+token_new :: proc {
+    token_new_char,
+    token_new_str,
 }
 
 //------------------------------------------------------------------------------
@@ -131,10 +144,22 @@ lexer_next_token :: proc(using lexer: ^Lexer) -> Token
 
     switch ch {
         case '=': {
-            return token_new(.ASSIGN, ch)
+            if nch := lexer_peek_char(lexer); nch == '=' {
+                token = token_new(.EQ, "==")
+                lexer_read_char(lexer)
+            }
+            else {
+                return token_new(.ASSIGN, ch)
+            }
         }
         case '!': {
-            return token_new(.BANG, ch)
+            if nch := lexer_peek_char(lexer); nch == '=' {
+                token = token_new(.NOT_EQ, "!=")
+                lexer_read_char(lexer)
+            }
+            else {
+                return token_new(.BANG, ch)
+            }
         }
 
         case '+': {
@@ -151,10 +176,22 @@ lexer_next_token :: proc(using lexer: ^Lexer) -> Token
         }
 
         case '<': {
-            return token_new(.LT, ch)
+            if nch := lexer_peek_char(lexer); nch == '=' {
+                token = token_new(.LT_EQ, "<=")
+                lexer_read_char(lexer)
+            }
+            else {
+                return token_new(.LT, ch)
+            }
         }
         case '>': {
-            return token_new(.GT, ch)
+            if nch := lexer_peek_char(lexer); nch == '=' {
+                token = token_new(.GT_EQ, ">=")
+                lexer_read_char(lexer)
+            }
+            else {
+                return token_new(.GT, ch)
+            }
         }
         case ';': {
             return token_new(.SEMICOLON, ch)
@@ -175,7 +212,7 @@ lexer_next_token :: proc(using lexer: ^Lexer) -> Token
             return token_new(.RBRACE, ch)
         }
 
-        case 0: {
+        case 0: {   // '\0'
             return token_new(.EOF, 0)
         }
 
